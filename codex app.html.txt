@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>Linking Words Masterclass</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+    :root {
+      --primary: #6c5ce7;
+      --secondary: #00b894;
+      --accent: #fd79a8;
+      --background: #0f172a;
+      --surface: rgba(15, 23, 42, 0.85);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top left, #2a9d8f 0%, #1d3557 40%, #0f172a 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    header.top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 110;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(18px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 2.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .logo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      box-shadow: 0 0 12px rgba(253, 121, 168, 0.7);
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
+    .nav-menu a {
+      font-weight: 400;
+      font-size: 0.95rem;
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-menu a:hover::after,
+    .nav-menu a.active::after {
+      transform: scaleX(1);
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.75rem;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .menu-toggle .menu-icon {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .menu-toggle .menu-icon span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 999px;
+    }
+    main {
+      position: relative;
+    }
+
+    section {
+      position: relative;
+      padding: 6rem 10vw;
+    }
+
+    section::before {
+      content: '';
+      position: absolute;
+      inset: 1.5rem;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+
+    section:nth-child(even) {
+      background: rgba(15, 23, 42, 0.35);
+    }
+
+    .hero {
+      min-height: 75vh;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 5rem 8vw;
+      overflow: hidden;
+    }
+
+    #scene {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      filter: saturate(135%);
+    }
+
+    .hero-content {
+      max-width: 560px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.9rem;
+      background: rgba(108, 92, 231, 0.25);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .tag::before {
+      content: '*';
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 4vw, 3.75rem);
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .hero-content p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .nav-btn {
+      padding: 0.85rem 1.75rem;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: var(--text);
+      box-shadow: 0 10px 30px rgba(108, 92, 231, 0.35);
+    }
+
+    .ghost-btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+
+    .hero-stats div {
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 16px;
+      padding: 1.2rem;
+      text-align: center;
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.4);
+    }
+
+    .hero-stats span {
+      display: block;
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .content-section {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-header p {
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .cards-grid {
+      display: grid;
+      gap: 1.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 20px;
+      padding: 1.8rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.35);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(253, 121, 168, 0.6);
+    }
+
+    .card.highlight {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.4), rgba(0, 184, 148, 0.35));
+      border-color: rgba(108, 92, 231, 0.45);
+    }
+
+    .card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0 0.5rem;
+      list-style: none;
+    }
+
+    .chip-list li {
+      background: rgba(148, 163, 184, 0.2);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+    }
+
+    .example {
+      padding: 1rem;
+      background: rgba(148, 163, 184, 0.12);
+      border-radius: 14px;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .mini-labs {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .mini-labs .card {
+      background: rgba(108, 92, 231, 0.25);
+      border-color: rgba(108, 92, 231, 0.35);
+    }
+
+    .step-list {
+      list-style: none;
+      display: grid;
+      gap: 1.4rem;
+      margin-top: 1.5rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .step-item::before {
+      content: attr(data-step);
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .step-item h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .game-area {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 24px;
+      padding: 2rem;
+      border: 1px solid rgba(108, 92, 231, 0.4);
+      box-shadow: 0 22px 48px rgba(15, 23, 42, 0.45);
+    }
+
+    .scoreboard {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .scoreboard div {
+      flex: 1;
+      min-width: 140px;
+      background: rgba(108, 92, 231, 0.2);
+      padding: 0.85rem 1.1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(108, 92, 231, 0.4);
+      font-size: 0.9rem;
+    }
+
+    .scoreboard strong {
+      font-size: 1.2rem;
+      margin-left: 0.3rem;
+      color: var(--text);
+    }
+
+    .option-deck {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+    }
+
+    .option-btn {
+      padding: 0.75rem 1.4rem;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+      font-weight: 600;
+    }
+
+    .option-btn:hover {
+      transform: translateY(-2px);
+      background: rgba(108, 92, 231, 0.35);
+    }
+
+    .option-btn.disabled {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .option-btn.correct {
+      background: rgba(0, 184, 148, 0.35);
+      border-color: rgba(0, 184, 148, 0.6);
+    }
+
+    .option-btn.incorrect {
+      background: rgba(253, 121, 168, 0.25);
+      border-color: rgba(253, 121, 168, 0.5);
+    }
+
+    .game-sentence {
+      font-size: 1.25rem;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .game-context {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .game-feedback {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .game-feedback.correct {
+      color: #7bed9f;
+    }
+
+    .game-feedback.incorrect {
+      color: #ff7675;
+    }
+
+    .summary {
+      margin-top: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      border-radius: 16px;
+      background: rgba(34, 211, 238, 0.15);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .quiz-form {
+      display: grid;
+      gap: 1.75rem;
+    }
+
+    .quiz-question {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 20px;
+      padding: 1.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .quiz-question h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .quiz-question p {
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+    }
+
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .quiz-option input {
+      accent-color: var(--accent);
+      transform: scale(1.08);
+    }
+
+    .quiz-feedback {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      min-height: 1.2rem;
+    }
+
+    .quiz-feedback.correct {
+      color: #7bed9f;
+    }
+
+    .quiz-feedback.incorrect {
+      color: #ff7675;
+    }
+
+    .quiz-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-start;
+    }
+
+    .resource-grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-bottom: 2rem;
+    }
+
+    .reflection {
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 22px;
+      border: 1px solid rgba(0, 184, 148, 0.35);
+      padding: 1.75rem;
+      box-shadow: 0 18px 35px rgba(0, 184, 148, 0.22);
+    }
+
+    .reflection h3 {
+      margin-bottom: 0.6rem;
+    }
+
+    .reflection p {
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .section-nav {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .nav-btn {
+      background: rgba(108, 92, 231, 0.3);
+      border: 1px solid rgba(108, 92, 231, 0.5);
+      color: var(--text);
+    }
+
+    .nav-btn.ghost {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .nav-btn.small {
+      padding: 0.6rem 1.1rem;
+      font-size: 0.85rem;
+    }
+
+    footer {
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.9);
+      border-top: 1px solid var(--border);
+    }
+
+    #backToTop {
+      position: fixed;
+      right: 1.75rem;
+      bottom: 1.75rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      color: var(--text);
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.4);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 150;
+    }
+
+    #backToTop.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95));
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      transition: opacity 0.5s ease;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .overlay-card {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 24px;
+      padding: 2.5rem 2.75rem;
+      border: 1px solid rgba(108, 92, 231, 0.4);
+      box-shadow: 0 26px 55px rgba(15, 23, 42, 0.6);
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .overlay-card h2 {
+      margin-bottom: 0.75rem;
+      font-size: 2rem;
+    }
+
+    .overlay-card p {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .overlay-card input {
+      width: 100%;
+      padding: 0.9rem 1.1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text);
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+    }
+
+    .overlay-card input.shake {
+      animation: shake 0.4s ease;
+      border-color: rgba(253, 121, 168, 0.8);
+    }
+
+    .overlay-tip {
+      font-size: 0.8rem;
+      color: rgba(148, 163, 184, 0.8);
+      line-height: 1.4;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes shake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-6px);
+      }
+      75% {
+        transform: translateX(6px);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      header.top-nav {
+        padding: 0.85rem 1.5rem;
+      }
+
+      .nav-menu {
+        position: absolute;
+        top: 100%;
+        right: 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        background: rgba(15, 23, 42, 0.95);
+        padding: 1.2rem;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        transform: translateY(-20px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .nav-menu.open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .hero {
+        padding: 4rem 6vw;
+      }
+    }
+
+    @media (max-width: 720px) {
+      section {
+        padding: 4.5rem 6vw;
+      }
+
+      section::before {
+        inset: 0.75rem;
+      }
+
+      .hero-stats {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .scoreboard {
+        flex-direction: column;
+      }
+
+      .quiz-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class='overlay' id='nameOverlay' role='dialog' aria-labelledby='overlayTitle' aria-modal='true'>
+    <div class='overlay-card'>
+      <h2 id='overlayTitle'>Welcome, word explorer!</h2>
+      <p>Drop your name so we can personalise every hint, cheer, and nudge throughout this masterclass.</p>
+      <form id='nameForm'>
+        <input type='text' id='learnerNameInput' placeholder='Type your name' autocomplete='off' required>
+        <button type='submit' class='primary-btn'>Start My Journey</button>
+      </form>
+      <p class='overlay-tip'>Your name will appear in encouragements, scoreboards, and feedback so everything feels tailor-made.</p>
+    </div>
+  </div>
+
+  <header class='top-nav' id='topNav'>
+    <div class='brand'><span class='logo-dot'></span> Linking Words HQ</div>
+    <button class='menu-toggle' id='menuToggle' aria-label='Toggle navigation'>
+      <span class='menu-icon'><span></span><span></span><span></span></span>
+    </button>
+    <nav class='nav-menu' id='navMenu'>
+      <a href='#home' class='active'>Home</a>
+      <a href='#overview'>Overview</a>
+      <a href='#types'>Linking Word Lab</a>
+      <a href='#strategies'>Strategies</a>
+      <a href='#game'>Game</a>
+      <a href='#quiz'>Quiz</a>
+      <a href='#resources'>Resources</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class='hero' id='home'>
+      <canvas id='scene'></canvas>
+      <div class='hero-content'>
+        <span class='tag'>Advanced Grammar Studio</span>
+        <h1>Hey <span class='learner-name'>trailblazer</span>, let's level up your linking words.</h1>
+        <p id='personalGreeting'>Master cohesive writing with interactive labs, live feedback, and challenges that feel like a game.</p>
+        <div class='hero-actions'>
+          <a class='primary-btn' href='#overview'>Explore the Lesson</a>
+          <a class='ghost-btn' href='#game'>Jump into the Game</a>
+        </div>
+        <div class='hero-stats'>
+          <div><span>4</span> skill labs</div>
+          <div><span>12</span> premium connectors</div>
+          <div><span>100%</span> feedback-driven</div>
+        </div>
+      </div>
+    </section>
+
+    <section id='overview' class='content-section'>
+      <div class='section-header'>
+        <h2>Why Linking Words Matter for Advanced Communicators</h2>
+        <p>Linking words are the neural network of your writing: they transmit logic, nuance, and tone across sentences and paragraphs. Mastering them means your arguments glide, your narratives flow, and your examiners pay attention.</p>
+      </div>
+      <div class='grid three'>
+        <article class='card highlight'>
+          <h3>Cohesion that sticks</h3>
+          <p>Strategic connectors make your writing feel inevitable. Readers never doubt how ideas relate because you guide them direction by direction.</p>
+          <div class='example'>Example: &ldquo;The data were inconclusive; <strong>nonetheless</strong>, the research sparked new questions.&rdquo;</div>
+        </article>
+        <article class='card'>
+          <h3>Nuance and precision</h3>
+          <p>Different linking words carry micro-meanings. Choosing <em>although</em> over <em>however</em> shifts emphasis from contrast to concession.</p>
+          <div class='example'>Use <strong>whereas</strong> to highlight contrast, but <strong>while</strong> to soften disagreement.</div>
+        </article>
+        <article class='card'>
+          <h3>Academic edge</h3>
+          <p>Advanced connectors signal control. They help you meet criteria in international exams and show universities that you write like a scholar.</p>
+          <div class='example'><strong>Furthermore</strong> elevates accumulation; <strong>notwithstanding</strong> delivers formal concession.</div>
+        </article>
+      </div>
+      <div class='section-nav'>
+        <button class='nav-btn' data-target='#types'>Next: Linking Word Lab &rarr;</button>
+      </div>
+    </section>
+
+    <section id='types' class='content-section'>
+      <div class='section-header'>
+        <h2>The Linking Word Lab</h2>
+        <p>Dive into high-impact categories. Each lab showcases signature connectors, usage cues, and model sentences you can remix in your own essays.</p>
+      </div>
+      <div class='cards-grid'>
+        <article class='card'>
+          <h3>Contrast &amp; Concession</h3>
+          <p>Use when ideas collide or you want to acknowledge an opposing view before landing your point.</p>
+          <ul class='chip-list'>
+            <li>nevertheless</li>
+            <li>nonetheless</li>
+            <li>granted</li>
+            <li>in spite of</li>
+            <li>even so</li>
+          </ul>
+          <div class='example'>&ldquo;The policy is expensive; <strong>nevertheless</strong>, it protects vulnerable communities.&rdquo;</div>
+        </article>
+        <article class='card'>
+          <h3>Cause &amp; Effect</h3>
+          <p>Explain motivations, logical outcomes, or academic implications without sounding repetitive.</p>
+          <ul class='chip-list'>
+            <li>consequently</li>
+            <li>therefore</li>
+            <li>thus</li>
+            <li>owing to</li>
+            <li>as a result</li>
+          </ul>
+          <div class='example'>&ldquo;Attendance improved, <strong>consequently</strong> boosting overall performance.&rdquo;</div>
+        </article>
+        <article class='card'>
+          <h3>Addition &amp; Emphasis</h3>
+          <p>Layer ideas, highlight supporting evidence, or spotlight your strongest arguments.</p>
+          <ul class='chip-list'>
+            <li>moreover</li>
+            <li>furthermore</li>
+            <li>notably</li>
+            <li>in fact</li>
+            <li>equally important</li>
+          </ul>
+          <div class='example'>&ldquo;The film dazzles visually; <strong>moreover</strong>, its script is razor sharp.&rdquo;</div>
+        </article>
+        <article class='card'>
+          <h3>Sequencing &amp; Framing</h3>
+          <p>Navigate readers through time, logic, or procedure so your structure feels intentional.</p>
+          <ul class='chip-list'>
+            <li>initially</li>
+            <li>meanwhile</li>
+            <li>ultimately</li>
+            <li>subsequently</li>
+            <li>in the meantime</li>
+          </ul>
+          <div class='example'>&ldquo;<strong>Initially</strong>, scientists dismissed the anomaly; <strong>ultimately</strong>, it became the breakthrough.&rdquo;</div>
+        </article>
+      </div>
+      <div class='mini-labs'>
+        <article class='card'>
+          <h3>Register radar</h3>
+          <p>Match the mood. <strong>Nonetheless</strong> suits formal essays, while <strong>even though</strong> fits narratives or speeches.</p>
+        </article>
+        <article class='card'>
+          <h3>Positioning power</h3>
+          <p>Front-loaded connectors grab attention (&ldquo;Furthermore, ...&rdquo;). Mid-position variants keep flow (&ldquo;..., furthermore, ...&rdquo;).</p>
+        </article>
+        <article class='card'>
+          <h3>Rhythm remix</h3>
+          <p>Alternate between single-word and phrasal connectors to keep syntax musical and precise.</p>
+        </article>
+      </div>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#overview'>&larr; Back to Overview</button>
+        <button class='nav-btn' data-target='#strategies'>Next: Strategies &amp; Style &rarr;</button>
+      </div>
+    </section>
+    <section id='strategies' class='content-section'>
+      <div class='section-header'>
+        <h2>Strategies for High-Impact Linking</h2>
+        <p>Translate knowledge into craft. Use these workflows before, during, and after writing to keep your connectors sharp.</p>
+      </div>
+      <ul class='step-list'>
+        <li class='step-item' data-step='1'>
+          <div>
+            <h4>Plan for logic, not just order</h4>
+            <p>Sketch how each paragraph relates. Label relationships (contrast, cause, addition) so you can select connectors with purpose.</p>
+          </div>
+        </li>
+        <li class='step-item' data-step='2'>
+          <div>
+            <h4>Embed connectors in sentence variety</h4>
+            <p>Pair concise sentences with longer complex ones. Vary connector placement to avoid a predictable rhythm in your prose.</p>
+          </div>
+        </li>
+        <li class='step-item' data-step='3'>
+          <div>
+            <h4>Audit for repetition</h4>
+            <p>After writing, highlight all linking words. Replace duplicates with higher-register synonyms or restructure to maintain freshness.</p>
+          </div>
+        </li>
+        <li class='step-item' data-step='4'>
+          <div>
+            <h4>Calibrate tone intentionally</h4>
+            <p>Choose formal connectors for analytical writing and narrative-friendly ones when telling stories or crafting speeches.</p>
+          </div>
+        </li>
+      </ul>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#types'>&larr; Back to Lab</button>
+        <button class='nav-btn' data-target='#game'>Challenge Me &rarr;</button>
+      </div>
+    </section>
+
+    <section id='game' class='content-section'>
+      <div class='section-header'>
+        <h2>The Connector Challenge</h2>
+        <p>Play through evolving contexts and choose the connector that delivers the exact nuance. You gain points, streaks, and feedback in real time.</p>
+      </div>
+      <div class='game-area'>
+        <div class='scoreboard'>
+          <div>Round<strong id='gameRound'>0</strong>/<strong id='gameTotal'>0</strong></div>
+          <div>Score<strong id='gameScore'>0</strong></div>
+          <div>Streak<strong id='gameStreak'>0</strong></div>
+        </div>
+        <div id='gameIntro'>
+          <p>Hit start to face six scenarios. Read the context, then tap the connector that fits best. Earn bonus energy with streaks!</p>
+        </div>
+        <button id='gameStart' class='primary-btn'>Start the Challenge</button>
+        <div id='gameCard' class='card hidden'>
+          <div class='game-sentence' id='gameSentence'></div>
+          <div class='game-context' id='gameContext'></div>
+          <div class='option-deck' id='gameOptions'></div>
+          <div class='game-feedback' id='gameFeedback'></div>
+          <button id='gameNext' class='ghost-btn small hidden'>Next Prompt &rarr;</button>
+        </div>
+        <div id='gameSummary' class='summary hidden'></div>
+      </div>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#strategies'>&larr; Back to Strategies</button>
+        <button class='nav-btn' data-target='#quiz'>Ready for the Quiz &rarr;</button>
+      </div>
+    </section>
+    <section id='quiz' class='content-section'>
+      <div class='section-header'>
+        <h2>Self-Grading Quiz</h2>
+        <p>Show what you know. Each answer triggers instant feedback. Miss one? You will see an explanation plus a suggestion tailored to you.</p>
+      </div>
+      <form id='quizForm' class='quiz-form'>
+        <div class='quiz-question' data-answer='nevertheless'>
+          <h3>1. Which connector sustains a formal concession?</h3>
+          <p>The team faced severe budget cuts; ______, they maintained high morale.</p>
+          <label class='quiz-option'><input type='radio' name='q1' value='therefore'> therefore</label>
+          <label class='quiz-option'><input type='radio' name='q1' value='nevertheless'> nevertheless</label>
+          <label class='quiz-option'><input type='radio' name='q1' value='besides'> besides</label>
+          <div class='quiz-feedback'></div>
+        </div>
+        <div class='quiz-question' data-answer='consequently'>
+          <h3>2. Which option reinforces cause and effect?</h3>
+          <p>The experiment lacked a control group; ______, the findings are unreliable.</p>
+          <label class='quiz-option'><input type='radio' name='q2' value='consequently'> consequently</label>
+          <label class='quiz-option'><input type='radio' name='q2' value='meanwhile'> meanwhile</label>
+          <label class='quiz-option'><input type='radio' name='q2' value='nonetheless'> nonetheless</label>
+          <div class='quiz-feedback'></div>
+        </div>
+        <div class='quiz-question' data-answer='moreover'>
+          <h3>3. Choose the connector that adds emphasis.</h3>
+          <p>The speaker delivered compelling data; ______, her storytelling electrified the audience.</p>
+          <label class='quiz-option'><input type='radio' name='q3' value='moreover'> moreover</label>
+          <label class='quiz-option'><input type='radio' name='q3' value='instead'> instead</label>
+          <label class='quiz-option'><input type='radio' name='q3' value='otherwise'> otherwise</label>
+          <div class='quiz-feedback'></div>
+        </div>
+        <div class='quiz-question' data-answer='ultimately'>
+          <h3>4. Which connector helps close a logical sequence?</h3>
+          <p>She tracked each prototype, gathered user feedback, and, ______, launched the strongest version.</p>
+          <label class='quiz-option'><input type='radio' name='q4' value='ultimately'> ultimately</label>
+          <label class='quiz-option'><input type='radio' name='q4' value='simultaneously'> simultaneously</label>
+          <label class='quiz-option'><input type='radio' name='q4' value='nevertheless'> nevertheless</label>
+          <div class='quiz-feedback'></div>
+        </div>
+        <div class='quiz-controls'>
+          <button type='submit' class='primary-btn'>Grade My Answers</button>
+          <button type='button' id='retakeQuiz' class='ghost-btn'>Reset Quiz</button>
+        </div>
+      </form>
+      <div id='quizSummary' class='summary'></div>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#game'>&larr; Back to Game</button>
+        <button class='nav-btn' data-target='#resources'>Explore Resources &rarr;</button>
+      </div>
+    </section>
+
+    <section id='resources' class='content-section'>
+      <div class='section-header'>
+        <h2>Extend the Learning</h2>
+        <p>Translate insight into action. Use these resources to reinforce linking words in your daily writing practice.</p>
+      </div>
+      <div class='resource-grid'>
+        <article class='card'>
+          <h3>Editing checklist</h3>
+          <p>Run this checklist before submitting an essay.</p>
+          <ul class='chip-list'>
+            <li>Highlight repeated connectors</li>
+            <li>Check tone alignment</li>
+            <li>Switch positions (front/mid/end)</li>
+            <li>Replace weak transitions</li>
+          </ul>
+        </article>
+        <article class='card'>
+          <h3>Sentence remix drill</h3>
+          <p>Rewrite three sentences each day using different connector categories. Track how meaning shifts.</p>
+        </article>
+        <article class='card'>
+          <h3>Reading radar</h3>
+          <p>Underline connectors in articles or novels. Ask what effect each one achieves and note combos you love.</p>
+        </article>
+      </div>
+      <div class='reflection'>
+        <h3>Reflect &amp; plan ahead</h3>
+        <p>Jot two linking words you want to showcase in your next essay and the tone they express. Challenge yourself to teach a friend one new connector this week.</p>
+        <button class='primary-btn' data-target='#home'>Return to Top</button>
+      </div>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#quiz'>&larr; Back to Quiz</button>
+        <button class='nav-btn' data-target='#home'>Back to Home &uarr;</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Crafted with curiosity for advanced English explorers. Keep connecting ideas, <span class='learner-name'>word artist</span>!
+  </footer>
+
+  <button id='backToTop' aria-label='Back to top'>&uarr;</button>
+
+  <script src='https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js'></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('nameOverlay');
+      const nameForm = document.getElementById('nameForm');
+      const nameInput = document.getElementById('learnerNameInput');
+      const nameTargets = document.querySelectorAll('.learner-name');
+      const greeting = document.getElementById('personalGreeting');
+      const navMenu = document.getElementById('navMenu');
+      const menuToggle = document.getElementById('menuToggle');
+      const navLinks = navMenu.querySelectorAll('a');
+      const targetButtons = document.querySelectorAll('[data-target]');
+      const backToTop = document.getElementById('backToTop');
+
+      const gameStart = document.getElementById('gameStart');
+      const gameCard = document.getElementById('gameCard');
+      const gameSentence = document.getElementById('gameSentence');
+      const gameContext = document.getElementById('gameContext');
+      const gameOptions = document.getElementById('gameOptions');
+      const gameFeedback = document.getElementById('gameFeedback');
+      const gameNext = document.getElementById('gameNext');
+      const gameSummary = document.getElementById('gameSummary');
+      const gameRound = document.getElementById('gameRound');
+      const gameTotal = document.getElementById('gameTotal');
+      const gameScore = document.getElementById('gameScore');
+      const gameStreak = document.getElementById('gameStreak');
+
+      const quizForm = document.getElementById('quizForm');
+      const quizSummary = document.getElementById('quizSummary');
+      const retakeQuiz = document.getElementById('retakeQuiz');
+
+      let learnerName = 'trailblazer';
+
+      function personalise(name) {
+        learnerName = name;
+        nameTargets.forEach(el => el.textContent = name);
+        greeting.textContent = `${name}, let's push your transitions beyond the basics with nuanced choices that wow examiners.`;
+      }
+
+      nameForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const value = nameInput.value.trim();
+        if (!value) {
+          nameInput.classList.add('shake');
+          nameInput.placeholder = 'Please share your name!';
+          setTimeout(() => nameInput.classList.remove('shake'), 400);
+          return;
+        }
+        personalise(value);
+        overlay.classList.add('hidden');
+        setTimeout(() => overlay.style.display = 'none', 600);
+      });
+
+      menuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('open');
+      });
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          navMenu.classList.remove('open');
+          navLinks.forEach(item => item.classList.remove('active'));
+          link.classList.add('active');
+        });
+      });
+
+      targetButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const target = button.getAttribute('data-target');
+          if (target) {
+            const el = document.querySelector(target);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
+        });
+      });
+
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) {
+          backToTop.classList.add('show');
+        } else {
+          backToTop.classList.remove('show');
+        }
+      });
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = '#' + entry.target.id;
+            navLinks.forEach(link => {
+              link.classList.toggle('active', link.getAttribute('href') === id);
+            });
+          }
+        });
+      }, {
+        threshold: 0.4
+      });
+
+      document.querySelectorAll('main section').forEach(section => observer.observe(section));
+
+      const gameSlides = [
+        {
+          sentence: 'I set two alarms, ___ I still overslept.',
+          context: 'You need a connector that shows surprise and contrast.',
+          options: ['thus', 'yet', 'because'],
+          answer: 'yet',
+          feedback: 'Yet highlights an unexpected contrast between preparation and result.'
+        },
+        {
+          sentence: 'The volunteers distributed flyers; ___, donations doubled overnight.',
+          context: 'Choose a connector that marks a direct result.',
+          options: ['meanwhile', 'consequently', 'however'],
+          answer: 'consequently',
+          feedback: 'Consequently makes the cause-effect relationship explicit.'
+        },
+        {
+          sentence: 'We revisited the initial plan; ___, we kept the audience engaged with fresh examples.',
+          context: 'You want to add a new, stronger point.',
+          options: ['moreover', 'otherwise', 'instead'],
+          answer: 'moreover',
+          feedback: 'Moreover keeps the momentum by adding a persuasive bonus idea.'
+        },
+        {
+          sentence: '___ the team was exhausted, they celebrated the victory.',
+          context: 'Lead with a concession before presenting the main clause.',
+          options: ['Although', 'Therefore', 'Meanwhile'],
+          answer: 'Although',
+          feedback: 'Although concedes difficulty while setting up the triumphant main idea.'
+        },
+        {
+          sentence: 'He refined the prototype, gathered testimonials, and ___ unveiled the final product.',
+          context: 'You are closing a sequence with the final action.',
+          options: ['ultimately', 'instead', 'nonetheless'],
+          answer: 'ultimately',
+          feedback: 'Ultimately signals culmination after a series of deliberate steps.'
+        },
+        {
+          sentence: 'The essay is persuasive; ___, its counterarguments remain underdeveloped.',
+          context: 'Pick a connector that concedes strength but hints at a weakness.',
+          options: ['granted', 'thus', 'similarly'],
+          answer: 'granted',
+          feedback: 'Granted acknowledges praise while preparing the reader for critique.'
+        }
+      ];
+
+      let gameIndex = 0;
+      let score = 0;
+      let streak = 0;
+
+      gameTotal.textContent = gameSlides.length.toString();
+
+      function renderGameSlide() {
+        const current = gameSlides[gameIndex];
+        gameRound.textContent = (gameIndex + 1).toString();
+        gameSentence.innerHTML = current.sentence.replace('___', '<strong>_____</strong>');
+        gameContext.textContent = current.context;
+        gameFeedback.textContent = '';
+        gameFeedback.className = 'game-feedback';
+        gameNext.classList.add('hidden');
+        gameOptions.innerHTML = '';
+        current.options.forEach(option => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn';
+          btn.type = 'button';
+          btn.textContent = option;
+          btn.addEventListener('click', () => evaluateGameAnswer(option, btn, current));
+          gameOptions.appendChild(btn);
+        });
+      }
+
+      function evaluateGameAnswer(selection, button, slide) {
+        const buttons = gameOptions.querySelectorAll('button');
+        buttons.forEach(btn => btn.classList.add('disabled'));
+        const correct = selection === slide.answer;
+        if (correct) {
+          score += 1;
+          streak += 1;
+          gameFeedback.textContent = `Nice choice, ${learnerName}! ${slide.feedback}`;
+          gameFeedback.classList.add('correct');
+        } else {
+          streak = 0;
+          gameFeedback.innerHTML = `Almost! <strong>${slide.answer}</strong> fits because ${slide.feedback}`;
+          gameFeedback.classList.add('incorrect');
+        }
+        gameScore.textContent = score.toString();
+        gameStreak.textContent = streak.toString();
+        gameNext.classList.remove('hidden');
+        if (correct) {
+          button.classList.add('correct');
+        } else {
+          button.classList.add('incorrect');
+        }
+      }
+
+      gameNext.addEventListener('click', () => {
+        gameIndex += 1;
+        if (gameIndex < gameSlides.length) {
+          renderGameSlide();
+        } else {
+          finishGame();
+        }
+      });
+
+      function finishGame() {
+        gameCard.classList.add('hidden');
+        gameSummary.classList.remove('hidden');
+        const remark = score === gameSlides.length
+          ? `Flawless! Your connector instincts are elite, ${learnerName}.`
+          : score >= gameSlides.length - 1
+            ? 'Strong work! A quick review of nuances will make you unstoppable.'
+            : 'Great hustle! Revisit the lab and replay to lock in the contrasts and cause-effect choices.';
+        gameSummary.innerHTML = `<strong>Score:</strong> ${score}/${gameSlides.length}<br>${remark}`;
+        gameStart.textContent = 'Play Again';
+        gameStart.classList.remove('hidden');
+      }
+
+      gameStart.addEventListener('click', () => {
+        gameStart.classList.add('hidden');
+        gameSummary.classList.add('hidden');
+        gameCard.classList.remove('hidden');
+        gameIndex = 0;
+        score = 0;
+        streak = 0;
+        gameRound.textContent = '1';
+        gameScore.textContent = '0';
+        gameStreak.textContent = '0';
+        renderGameSlide();
+      });
+
+      quizForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        let total = 0;
+        let correct = 0;
+        quizSummary.textContent = '';
+        quizForm.querySelectorAll('.quiz-question').forEach((question) => {
+          const answer = question.getAttribute('data-answer');
+          const feedback = question.querySelector('.quiz-feedback');
+          const checked = question.querySelector('input[type=radio]:checked');
+          total += 1;
+          if (!checked) {
+            feedback.textContent = 'Select an option to receive feedback.';
+            feedback.className = 'quiz-feedback';
+            return;
+          }
+          if (checked.value === answer) {
+            correct += 1;
+            feedback.textContent = `Spot on, ${learnerName}! That connector nails the nuance.`;
+            feedback.className = 'quiz-feedback correct';
+          } else {
+            feedback.textContent = `Not quite. Try ${answer} to express the intended relationship with precision.`;
+            feedback.className = 'quiz-feedback incorrect';
+          }
+        });
+        quizSummary.textContent = `${learnerName}, you scored ${correct}/${total}. ${correct === total ? 'You just proved you can deploy advanced linking words with style.' : 'Review the explanations above, revisit the lab, and retake the quiz to cement every nuance.'}`;
+      });
+
+      retakeQuiz.addEventListener('click', () => {
+        quizForm.reset();
+        quizSummary.textContent = '';
+        quizForm.querySelectorAll('.quiz-feedback').forEach(feedback => {
+          feedback.textContent = '';
+          feedback.className = 'quiz-feedback';
+        });
+      });
+
+      const heroSection = document.querySelector('.hero');
+      const canvas = document.getElementById('scene');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(55, heroSection.clientWidth / heroSection.clientHeight, 0.1, 1000);
+      camera.position.z = 18;
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+      scene.add(ambient);
+
+      const light = new THREE.PointLight(0xffffff, 1.2);
+      light.position.set(18, 16, 10);
+      scene.add(light);
+
+      const group = new THREE.Group();
+      for (let i = 0; i < 18; i += 1) {
+        const geometry = new THREE.DodecahedronGeometry(Math.random() * 1.2 + 0.8);
+        const color = new THREE.Color().setHSL(Math.random(), 0.6, 0.5);
+        const material = new THREE.MeshStandardMaterial({
+          color,
+          emissive: new THREE.Color(0x111111),
+          metalness: 0.2,
+          roughness: 0.35
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set((Math.random() - 0.5) * 22, (Math.random() - 0.5) * 12, (Math.random() - 0.5) * 18);
+        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        mesh.userData.spin = Math.random() * 0.01 + 0.003;
+        group.add(mesh);
+      }
+      scene.add(group);
+
+      const starGeometry = new THREE.BufferGeometry();
+      const starCount = 450;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount; i += 1) {
+        starPositions[i * 3] = (Math.random() - 0.5) * 70;
+        starPositions[i * 3 + 1] = (Math.random() - 0.5) * 40;
+        starPositions[i * 3 + 2] = (Math.random() - 0.5) * 70;
+      }
+      starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.25, transparent: true, opacity: 0.55 });
+      const stars = new THREE.Points(starGeometry, starMaterial);
+      scene.add(stars);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        group.rotation.y += 0.0012;
+        group.children.forEach(mesh => {
+          mesh.rotation.x += mesh.userData.spin;
+          mesh.rotation.y += mesh.userData.spin * 0.8;
+        });
+        stars.rotation.y += 0.0005;
+        renderer.render(scene, camera);
+      }
+
+      function onResize() {
+        const width = heroSection.clientWidth;
+        const height = heroSection.clientHeight;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      }
+
+      window.addEventListener('resize', onResize);
+      onResize();
+      animate();
+    });
+  </script>
+</body>
+</html>

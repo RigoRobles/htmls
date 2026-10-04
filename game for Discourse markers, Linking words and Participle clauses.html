@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Arcade: Discourse Markers, Linking Words & Participle Clauses</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-mid: #1f2937;
+            --accent: #7c3aed;
+            --accent-soft: rgba(124, 58, 237, 0.2);
+            --highlight: #38bdf8;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --success: #34d399;
+            --danger: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.2), transparent 45%),
+                        radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.2), transparent 50%),
+                        linear-gradient(160deg, #0b1120 0%, #111827 45%, #1e293b 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        header.hero {
+            padding: 3.5rem 1.5rem 2.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header.hero::before,
+        header.hero::after {
+            content: "";
+            position: absolute;
+            width: 480px;
+            height: 480px;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.55;
+            animation: float 18s ease-in-out infinite;
+        }
+
+        header.hero::before {
+            background: rgba(56, 189, 248, 0.55);
+            top: -320px;
+            left: -180px;
+        }
+
+        header.hero::after {
+            background: rgba(124, 58, 237, 0.45);
+            bottom: -340px;
+            right: -220px;
+            animation-delay: 4s;
+        }
+
+        header.hero h1 {
+            margin: 0;
+            font-size: clamp(2.4rem, 4vw, 3.3rem);
+            letter-spacing: -1px;
+        }
+
+        header.hero p {
+            max-width: 720px;
+            margin: 1rem auto 1.6rem;
+            color: var(--text-muted);
+            font-size: 1.04rem;
+            line-height: 1.6;
+        }
+        .hero-controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .scoreboard {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            backdrop-filter: blur(12px);
+            padding: 0.9rem 1.8rem;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 1.05rem;
+        }
+
+        .scoreboard strong {
+            font-size: 1.7rem;
+            color: var(--highlight);
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .scoreboard strong.pulse {
+            animation: pulse 0.7s ease;
+        }
+
+        .timer-toggle {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            backdrop-filter: blur(12px);
+            padding: 0.9rem 1.4rem;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .timer-toggle input {
+            accent-color: var(--accent);
+            width: 20px;
+            height: 20px;
+        }
+
+        .timer-hint {
+            width: 100%;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+        }
+
+        nav.quick-nav {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 0.5rem 1.5rem;
+            backdrop-filter: blur(16px);
+            background: linear-gradient(90deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.82));
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        nav.quick-nav ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        nav.quick-nav a {
+            text-decoration: none;
+            color: var(--text-main);
+            padding: 0.55rem 1.1rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: rgba(148, 163, 184, 0.12);
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        nav.quick-nav a:hover {
+            border-color: rgba(56, 189, 248, 0.6);
+            background: rgba(56, 189, 248, 0.18);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        main {
+            padding: 2.5rem 1.2rem 3rem;
+            display: grid;
+            gap: 2.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-section {
+            position: relative;
+        }
+
+        .game-card {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 22px;
+            padding: clamp(1.5rem, 2.5vw, 2.5rem);
+            display: grid;
+            gap: 1.2rem;
+            box-shadow: 0 25px 70px rgba(8, 11, 24, 0.45);
+            overflow: hidden;
+        }
+
+        .game-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 15% 15%, rgba(124, 58, 237, 0.25), transparent 55%),
+                        radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.22), transparent 60%);
+            opacity: 0.35;
+            pointer-events: none;
+            animation: shimmer 14s linear infinite;
+        }
+
+        .game-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-card h2 {
+            margin: 0;
+            font-size: 2rem;
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .game-card h2 span.badge {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            color: var(--text-muted);
+        }
+
+        .subtitle {
+            margin: -0.4rem 0 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
+        }
+
+        .game-area {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 18px;
+            padding: 1.5rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .story-card,
+        .linking-bridge,
+        .lab-stage {
+            background: rgba(148, 163, 184, 0.08);
+            border-radius: 16px;
+            padding: 1.2rem 1.4rem;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            display: grid;
+            gap: 0.75rem;
+            animation: slide-up 0.6s ease;
+        }
+
+        .story-card p,
+        .lab-stage p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .scene-title {
+            font-size: 0.95rem;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: var(--highlight);
+        }
+
+        .blank {
+            display: inline-block;
+            min-width: 80px;
+            padding: 0.12rem 0.3rem;
+            border-bottom: 2px dashed rgba(148, 163, 184, 0.4);
+            color: var(--text-muted);
+        }
+
+        .option-grid {
+            display: grid;
+            gap: 0.8rem;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+        button.option-card {
+            border: none;
+            border-radius: 16px;
+            padding: 0.95rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.75), rgba(56, 189, 248, 0.75));
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+        }
+
+        button.option-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        button.option-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 35px rgba(56, 189, 248, 0.22);
+        }
+
+        button.option-card:hover::after {
+            opacity: 1;
+        }
+
+        button.option-card.correct {
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.8), rgba(16, 185, 129, 0.8));
+        }
+
+        button.option-card.incorrect {
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.85), rgba(239, 68, 68, 0.75));
+            filter: grayscale(6%);
+        }
+
+        button.option-card:disabled {
+            cursor: not-allowed;
+            opacity: 0.86;
+            transform: none;
+        }
+
+        .feedback {
+            min-height: 42px;
+            font-size: 0.98rem;
+            color: var(--text-muted);
+        }
+
+        .feedback strong {
+            color: #fff;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            border-radius: 12px;
+            padding: 0.85rem 1.4rem;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .controls button.primary {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.85), rgba(56, 189, 248, 0.85));
+            color: #fff;
+        }
+
+        .controls button.secondary {
+            background: rgba(148, 163, 184, 0.15);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            color: var(--text-muted);
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 28px rgba(8, 11, 24, 0.35);
+        }
+
+        .progress {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .timer-display {
+            font-family: "JetBrains Mono", "Consolas", monospace;
+            font-size: 1.1rem;
+            color: var(--highlight);
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 999px;
+            padding: 0.35rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .timer-display.danger {
+            color: var(--danger);
+            border-color: rgba(248, 113, 113, 0.6);
+            background: rgba(248, 113, 113, 0.12);
+        }
+
+        .timer-wrapper {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .bridge-path {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .bridge-node {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            display: grid;
+            place-items: center;
+            color: var(--text-muted);
+            font-weight: 600;
+            transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+        }
+
+        .bridge-node.active {
+            background: rgba(56, 189, 248, 0.28);
+            color: #fff;
+            transform: translateY(-4px);
+        }
+
+        .bridge-node.completed {
+            background: rgba(52, 211, 153, 0.35);
+            border-color: rgba(52, 211, 153, 0.65);
+            color: #fff;
+        }
+
+        .lab-stage .original {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .lab-stage .transformed {
+            font-size: 1.05rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem 3rem;
+            color: rgba(148, 163, 184, 0.65);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-18px) translateX(6px); }
+        }
+
+        @keyframes shimmer {
+            0% { opacity: 0.2; }
+            50% { opacity: 0.45; }
+            100% { opacity: 0.2; }
+        }
+
+        @keyframes slide-up {
+            from { transform: translateY(12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            35% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 680px) {
+            header.hero {
+                padding: 2.8rem 1rem 2rem;
+            }
+
+            .game-card {
+                padding: 1.4rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .controls button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <h1>Grammar Arcade</h1>
+        <p>Run three mini-adventures that turn discourse markers, linking words, and participle clauses into fast-paced play. Earn points, chase the timer if you dare, and watch the language glow as you connect ideas with style.</p>
+        <div class="hero-controls">
+            <div class="scoreboard">
+                Score
+                <strong id="scoreValue">0</strong>
+                pts
+            </div>
+            <label class="timer-toggle">
+                <input type="checkbox" id="timerToggle">
+                <span>Timer Mode (60s per challenge)</span>
+            </label>
+        </div>
+        <div class="timer-hint" id="timerHint">Timer off: explore at your own rhythm.</div>
+    </header>
+
+    <nav class="quick-nav">
+        <ul>
+            <li><a href="#discourse">Discourse Markers</a></li>
+            <li><a href="#linking">Linking Words</a></li>
+            <li><a href="#participle">Participle Clauses</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="game-section" id="discourse">
+            <article class="game-card">
+                <h2>Conversation Conductor <span class="badge">Discourse markers</span></h2>
+                <p class="subtitle">Steer the dialogue smoothly by dropping in the perfect discourse marker. Keep the talk on track, add ideas, and create sleek transitions.</p>
+                <div class="timer-wrapper">
+                    <div class="timer-display" id="discourseTimer">8</div>
+                </div>
+                <div class="game-area">
+                    <div class="story-card">
+                        <span class="scene-title">Scenario</span>
+                        <p id="discourseScene">Press <strong>Start round</strong> to begin conducting the conversation.</p>
+                        <p id="discourseLine" class="hero-line"></p>
+                    </div>
+                    <div class="option-grid" id="discourseOptions"></div>
+                    <div class="feedback" id="discourseFeedback"></div>
+                </div>
+                <div class="controls">
+                    <button class="primary" data-game="discourse">Start round</button>
+                    <button class="secondary" data-reset="discourse">Reset deck</button>
+                </div>
+                <div class="progress" id="discourseProgress">0 / 6 scenes remixed</div>
+            </article>
+        </section>
+        <section class="game-section" id="linking">
+            <article class="game-card">
+                <h2>Bridge Builder <span class="badge">Linking words</span></h2>
+                <p class="subtitle">Lay glowing connectors between ideas to keep this thought-bridge standing. Every correct word lights up a tile and pushes the narrative forward.</p>
+                <div class="timer-wrapper">
+                    <div class="timer-display" id="linkingTimer">8</div>
+                </div>
+                <div class="game-area">
+                    <div class="linking-bridge">
+                        <span class="scene-title">Mission status</span>
+                        <p id="linkingMission">Press <strong>Launch bridge</strong> to activate the pathway.</p>
+                        <div class="bridge-path" id="linkingPath"></div>
+                        <p id="linkingPrompt"></p>
+                    </div>
+                    <div class="option-grid" id="linkingOptions"></div>
+                    <div class="feedback" id="linkingFeedback"></div>
+                </div>
+                <div class="controls">
+                    <button class="primary" data-game="linking">Launch bridge</button>
+                    <button class="secondary" data-reset="linking">Reset path</button>
+                </div>
+                <div class="progress" id="linkingProgress">0 / 6 links activated</div>
+            </article>
+        </section>
+
+        <section class="game-section" id="participle">
+            <article class="game-card">
+                <h2>Clause Crafter <span class="badge">Participle clauses</span></h2>
+                <p class="subtitle">Transform long sentences into streamlined participle clauses and watch the lab screens animate. Choose the sleekest rewrite to earn extra glam.</p>
+                <div class="timer-wrapper">
+                    <div class="timer-display" id="participleTimer">8</div>
+                </div>
+                <div class="game-area">
+                    <div class="lab-stage">
+                        <span class="scene-title">Transformation bay</span>
+                        <p class="original" id="participleOriginal">Start the lab to receive your first sentence.</p>
+                        <p class="transformed" id="participlePrompt"></p>
+                    </div>
+                    <div class="option-grid" id="participleOptions"></div>
+                    <div class="feedback" id="participleFeedback"></div>
+                </div>
+                <div class="controls">
+                    <button class="primary" data-game="participle">Start crafting</button>
+                    <button class="secondary" data-reset="participle">Reset lab</button>
+                </div>
+                <div class="progress" id="participleProgress">0 / 6 builds completed</div>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        Keep practicing, experiment with the timer, and remix the rounds until your transitions shine.
+    </footer>
+
+    <script>
+        const state = {
+            score: 0,
+            useTimer: false,
+            timers: {}
+        };
+
+        const scoreValue = document.getElementById('scoreValue');
+        const timerToggle = document.getElementById('timerToggle');
+        const timerHint = document.getElementById('timerHint');
+
+        timerToggle.addEventListener('change', () => {
+            state.useTimer = timerToggle.checked;
+            timerHint.textContent = state.useTimer
+                ? 'Timer on: beat 60 seconds for each challenge.'
+                : 'Timer off: explore at your own rhythm.';
+            Object.keys(state.timers).forEach(stopTimer);
+        });
+
+        function adjustScore(amount) {
+            state.score = Math.max(0, state.score + amount);
+            scoreValue.textContent = state.score;
+            scoreValue.classList.remove('pulse');
+            void scoreValue.offsetWidth;
+            scoreValue.classList.add(''pulse'');
+        }
+
+        function startTimer(key, displayEl, onExpire) {
+            stopTimer(key);
+            if (!state.useTimer) {
+                displayEl.textContent = '8';
+                displayEl.classList.remove('danger');
+                return;
+            }
+            let remaining = 60;
+            displayEl.textContent = remaining + 's';
+            displayEl.classList.remove('danger');
+            const interval = setInterval(() => {
+                remaining -= 1;
+                if (remaining <= 10) {
+                    displayEl.classList.add('danger');
+                }
+                displayEl.textContent = remaining + 's';
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    delete state.timers[key];
+                    displayEl.textContent = '0s';
+                    onExpire();
+                }
+            }, 1000);
+            state.timers[key] = {
+                interval,
+                display: displayEl
+            };
+        }
+
+        function stopTimer(key) {
+            const timerData = state.timers[key];
+            if (timerData) {
+                clearInterval(timerData.interval);
+                timerData.display.textContent = '8';
+                timerData.display.classList.remove('danger');
+                delete state.timers[key];
+            }
+        }
+
+        function shuffle(array) {
+            const clone = array.slice();
+            for (let i = clone.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [clone[i], clone[j]] = [clone[j], clone[i]];
+            }
+            return clone;
+        }
+
+        // Discourse markers game setup
+        const discourseData = [
+            {
+                scene: 'The debate drifts off topic and you need to bring the focus back to the agenda.',
+                line: '____, let''s return to the main question: how do we welcome new members?',
+                options: ['Anyway', 'Meanwhile', 'Consequently'],
+                answer: 'Anyway',
+                explanation: '“Anyway” shifts the topic and signals a return to the main thread.'
+            },
+            {
+                scene: 'A teammate has made a point and you want to reinforce it with an extra idea.',
+                line: '____, we could invite alumni to mentor the new recruits.',
+                options: ['Moreover', 'However', 'Otherwise'],
+                answer: 'Moreover',
+                explanation: '“Moreover” adds another supporting point to the argument.'
+            },
+            {
+                scene: 'The group needs time to grab resources, so you stall the conversation politely.',
+                line: '____, could everyone open the shared document so we can compare the drafts?',
+                options: ['In the meantime', 'At least', 'By contrast'],
+                answer: 'In the meantime',
+                explanation: '“In the meantime” holds the discussion while another action happens.'
+            },
+            {
+                scene: 'You are about to present an unexpected idea and want to signal the surprise.',
+                line: '____, our quietest member volunteered to host the podcast.',
+                options: ['Believe it or not', 'Consequently', 'Otherwise'],
+                answer: 'Believe it or not',
+                explanation: 'This discourse marker alerts listeners to a surprising turn.'
+            },
+            {
+                scene: 'Two speakers made similar suggestions and you want to compare them.',
+                line: '____, Priya suggested launching the app in March, while Jorge preferred April.',
+                options: ['Similarly', 'Meanwhile', 'After all'],
+                answer: 'Meanwhile',
+                explanation: '“Meanwhile” is used to contrast actions happening at the same time.'
+            },
+            {
+                scene: 'You are closing the meeting and want to preview the next step.',
+                line: '____, we''ll send out the revised schedule tonight.',
+                options: ['To wrap up', 'Still', 'Because'],
+                answer: 'To wrap up',
+                explanation: '“To wrap up” signals the ending phase and leads into the next action.'
+            }
+        ];
+
+        const discourseGame = {
+            key: 'discourse',
+            baseData: discourseData,
+            deck: shuffle(discourseData),
+            index: 0,
+            completed: 0,
+            active: false,
+            answered: false,
+            elements: {
+                scene: document.getElementById('discourseScene'),
+                line: document.getElementById('discourseLine'),
+                options: document.getElementById('discourseOptions'),
+                feedback: document.getElementById('discourseFeedback'),
+                progress: document.getElementById('discourseProgress'),
+                timer: document.getElementById('discourseTimer')
+            }
+        };
+
+        // Linking words game setup
+        const linkingData = [
+            {
+                mission: 'Move from cause to result without breaking the bridge.',
+                sentence: 'We forgot to water the plants, ____ they wilted in the heat.',
+                options: ['so', 'although', 'unless'],
+                answer: 'so',
+                explanation: '“So” expresses the clear result of the previous clause.'
+            },
+            {
+                mission: 'Contrast two ideas and balance the bridge.',
+                sentence: 'The cafe is tiny, ____ it serves the best espresso in town.',
+                options: ['yet', 'before', 'therefore'],
+                answer: 'yet',
+                explanation: '“Yet” sets up an unexpected contrast between clauses.'
+            },
+            {
+                mission: 'Show the sequence of events as you cross.',
+                sentence: 'Finish the report, ____ submit it to the editor.',
+                options: ['then', 'even though', 'because'],
+                answer: 'then',
+                explanation: '“Then” clearly marks what happens immediately afterwards.'
+            },
+            {
+                mission: 'Provide a reason that strengthens the structure.',
+                sentence: 'Sam packed a spare battery, ____ she hates losing charge mid-shoot.',
+                options: ['because', 'otherwise', 'instead'],
+                answer: 'because',
+                explanation: '“Because” introduces a direct reason for the action.'
+            },
+            {
+                mission: 'Introduce an example to lock the beams in place.',
+                sentence: 'Many studies prove the point; ____, the 2023 survey echoes the trend.',
+                options: ['for instance', 'unless', 'when'],
+                answer: 'for instance',
+                explanation: '“For instance” signals that an example is coming.'
+            },
+            {
+                mission: 'Warn the traveller with a condition on the final tile.',
+                sentence: 'Keep the files backed up, ____ you might lose weeks of work.',
+                options: ['otherwise', 'besides', 'after'],
+                answer: 'otherwise',
+                explanation: '“Otherwise” introduces the consequence of failing to follow the advice.'
+            }
+        ];
+
+        const linkingGame = {
+            key: 'linking',
+            baseData: linkingData,
+            deck: shuffle(linkingData),
+            index: 0,
+            completed: 0,
+            active: false,
+            answered: false,
+            elements: {
+                mission: document.getElementById('linkingMission'),
+                prompt: document.getElementById('linkingPrompt'),
+                options: document.getElementById('linkingOptions'),
+                feedback: document.getElementById('linkingFeedback'),
+                progress: document.getElementById('linkingProgress'),
+                path: document.getElementById('linkingPath'),
+                timer: document.getElementById('linkingTimer')
+            }
+        };
+
+        // Participle clauses game setup
+        const participleData = [
+            {
+                original: 'After she had finished her lunch, Maya headed straight to rehearsal.',
+                prompt: 'Choose the sleek participle clause to combine these actions.',
+                options: ['Having finished her lunch, Maya headed straight to rehearsal.', 'Finished her lunch, Maya headed straight to rehearsal.', 'To finish her lunch, Maya headed straight to rehearsal.'],
+                answer: 'Having finished her lunch, Maya headed straight to rehearsal.',
+                explanation: '“Having finished” neatly shows the completed action before the main clause.'
+            },
+            {
+                original: 'Because he wanted to impress the judges, Leo practised his solo every night.',
+                prompt: 'Select the participle clause that shows the reason.',
+                options: ['Wanting to impress the judges, Leo practised his solo every night.', 'Impressing the judges, Leo practised his solo every night.', 'To impressing the judges, Leo practised his solo every night.'],
+                answer: 'Wanting to impress the judges, Leo practised his solo every night.',
+                explanation: '“Wanting to impress” expresses the motivation behind the main action.'
+            },
+            {
+                original: 'While she was walking along the shore, Nina collected shells for her project.',
+                prompt: 'Pick the participle clause that replaces the “while” clause.',
+                options: ['Walking along the shore, Nina collected shells for her project.', 'Walked along the shore, Nina collected shells for her project.', 'To walk along the shore, Nina collected shells for her project.'],
+                answer: 'Walking along the shore, Nina collected shells for her project.',
+                explanation: 'The present participle “Walking” shows the simultaneous action.'
+            },
+            {
+                original: 'Because it was packed with tourists, the beach felt less peaceful.',
+                prompt: 'Find the participle clause that introduces the reason.',
+                options: ['Being packed with tourists, the beach felt less peaceful.', 'Packed with tourists, the beach felt less peaceful.', 'To be packed with tourists, the beach felt less peaceful.'],
+                answer: 'Being packed with tourists, the beach felt less peaceful.',
+                explanation: '“Being packed” keeps the cause while sounding natural.'
+            },
+            {
+                original: 'Since he had heard the rumour, Omar approached the conversation carefully.',
+                prompt: 'Choose the participle clause that keeps the time reference clear.',
+                options: ['Having heard the rumour, Omar approached the conversation carefully.', 'Heard the rumour, Omar approached the conversation carefully.', 'To hearing the rumour, Omar approached the conversation carefully.'],
+                answer: 'Having heard the rumour, Omar approached the conversation carefully.',
+                explanation: '“Having heard” emphasises the completed action before the main event.'
+            },
+            {
+                original: 'Although they were exhausted, the volunteers continued painting the murals.',
+                prompt: 'Select the participle clause that shows contrast with energy.',
+                options: ['Although exhausted, the volunteers continued painting the murals.', 'Exhausted, the volunteers continued painting the murals.', 'Being exhausted, the volunteers continued painting the murals.'],
+                answer: 'Exhausted, the volunteers continued painting the murals.',
+                explanation: 'Dropping “being” makes the contrast crisp and idiomatic.'
+            }
+        ];
+
+        const participleGame = {
+            key: 'participle',
+            baseData: participleData,
+            deck: shuffle(participleData),
+            index: 0,
+            completed: 0,
+            active: false,
+            answered: false,
+            elements: {
+                original: document.getElementById('participleOriginal'),
+                prompt: document.getElementById('participlePrompt'),
+                options: document.getElementById('participleOptions'),
+                feedback: document.getElementById('participleFeedback'),
+                progress: document.getElementById('participleProgress'),
+                timer: document.getElementById('participleTimer')
+            }
+        };
+
+        const games = {
+            discourse: discourseGame,
+            linking: linkingGame,
+            participle: participleGame
+        };
+
+        function updateProgress(game) {
+            game.elements.progress.textContent = `${game.completed} / ${game.baseData.length} ${game.key === 'linking' ? 'links activated' : game.key === 'participle' ? 'builds completed' : 'scenes remixed'}`;
+        }
+
+        function handleStart(game) {
+            if (game.active && !game.answered) {
+                game.elements.feedback.innerHTML = '<strong>Choose an option</strong> to score this round.';
+                return;
+            }
+            if (game.index >= game.deck.length) {
+                game.deck = shuffle(game.baseData);
+                game.index = 0;
+                game.completed = 0;
+            }
+            game.active = true;
+            game.answered = false;
+            const card = game.deck[game.index];
+            setupRound(game, card);
+            startTimer(game.key, game.elements.timer, () => {
+                if (game.answered) {
+                    return;
+                }
+                revealAnswer(game, card, null, false, true);
+            });
+        }
+
+        function handleReset(game) {
+            stopTimer(game.key);
+            game.deck = shuffle(game.baseData);
+            game.index = 0;
+            game.completed = 0;
+            game.active = false;
+            game.answered = false;
+            updateProgress(game);
+            game.elements.options.innerHTML = '';
+            game.elements.feedback.textContent = '';
+            if (game.key === 'discourse') {
+                game.elements.scene.innerHTML = 'Deck reset. Press <strong>Start round</strong> to rehearse a new scene.';
+                game.elements.line.textContent = '';
+            } else if (game.key === 'linking') {
+                game.elements.mission.innerHTML = 'Path reset. Press <strong>Launch bridge</strong> to activate the new route.';
+                game.elements.prompt.textContent = '';
+                drawBridgePath(game);
+            } else if (game.key === 'participle') {
+                game.elements.original.textContent = 'Lab reset. Press <strong>Start crafting</strong> to receive the next task.';
+                game.elements.prompt.textContent = '';
+            }
+        }
+
+        function drawBridgePath(game) {
+            const total = game.baseData.length;
+            const path = game.elements.path;
+            path.innerHTML = '';
+            for (let i = 0; i < total; i++) {
+                const node = document.createElement('div');
+                node.className = 'bridge-node' + (i < game.completed ? ' completed' : '') + (i === game.completed ? ' active' : '');
+                node.textContent = i + 1;
+                path.appendChild(node);
+            }
+        }
+
+        function setupRound(game, card) {
+            game.elements.feedback.textContent = '';
+            game.elements.options.innerHTML = '';
+            const optionButtons = [];
+
+            card.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'option-card';
+                btn.textContent = option;
+                btn.addEventListener('click', () => {
+                    if (game.answered) {
+                        return;
+                    }
+                    const correct = option === card.answer;
+                    revealAnswer(game, card, btn, correct, false);
+                });
+                optionButtons.push(btn);
+                game.elements.options.appendChild(btn);
+            });
+
+            if (game.key === 'discourse') {
+                game.elements.scene.textContent = card.scene;
+                const lineHtml = card.line.replace('____', '<span class="blank">_____</span>');
+                game.elements.line.innerHTML = lineHtml;
+            }
+
+            if (game.key === 'linking') {
+                drawBridgePath(game);
+                game.elements.mission.textContent = card.mission;
+                game.elements.prompt.innerHTML = card.sentence.replace('____', '<span class="blank">_____</span>');
+            }
+
+            if (game.key === 'participle') {
+                game.elements.original.textContent = card.original;
+                game.elements.prompt.textContent = card.prompt;
+            }
+        }
+
+        function revealAnswer(game, card, chosenButton, correct, timedOut) {
+            game.answered = true;
+            game.active = false;
+            stopTimer(game.key);
+            const buttons = Array.from(game.elements.options.querySelectorAll('button'));
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === card.answer) {
+                    btn.classList.add('correct');
+                } else if (btn === chosenButton) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            if (game.key === 'discourse') {
+                game.elements.line.innerHTML = card.line.replace('____', `<strong>${card.answer}</strong>`);
+            }
+
+            if (game.key === 'linking') {
+                drawBridgePath(game);
+                game.elements.prompt.innerHTML = card.sentence.replace('____', `<strong>${card.answer}</strong>`);
+            }
+
+            if (game.key === 'participle') {
+                game.elements.prompt.textContent = card.answer;
+            }
+
+            if (timedOut) {
+                game.elements.feedback.innerHTML = `<strong>Time up!</strong> ${card.explanation}`;
+            } else if (correct) {
+                game.elements.feedback.innerHTML = `<strong>Nice!</strong> ${card.explanation}`;
+                adjustScore(15);
+            } else {
+                game.elements.feedback.innerHTML = `<strong>Almost.</strong> ${card.explanation}`;
+                adjustScore(-5);
+            }
+
+            if (!timedOut && correct) {
+                game.completed += 1;
+            } else if (timedOut) {
+                game.elements.feedback.innerHTML += ' Try the next round!';
+            }
+
+            if (!correct && !timedOut) {
+                game.completed += 1;
+            }
+
+            game.index += 1;
+            if (game.completed > game.baseData.length) {
+                game.completed = game.baseData.length;
+            }
+            updateProgress(game);
+
+            if (game.key === ''linking'') {
+                drawBridgePath(game);
+            }
+
+            if (game.index >= game.deck.length) {
+                game.elements.feedback.innerHTML += ' Deck complete! Hit start to remix the challenges.';
+            } else {
+                game.elements.feedback.innerHTML += ' Hit start for the next challenge.';
+            }
+        }
+
+        document.querySelectorAll('button.primary[data-game]').forEach(button => {
+            const key = button.dataset.game;
+            button.addEventListener('click', () => handleStart(games[key]));
+        });
+
+        document.querySelectorAll('button.secondary[data-reset]').forEach(button => {
+            const key = button.dataset.reset;
+            button.addEventListener('click', () => handleReset(games[key]));
+        });
+
+        // initialise bridge path
+        drawBridgePath(linkingGame);
+    </script>
+</body>
+</html>
+

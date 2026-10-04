@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grammar Pacman - Teacher Rigo's Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-container {
+            position: relative;
+            background: #000;
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            padding: 10px;
+        }
+
+        canvas {
+            display: block;
+            background: #111;
+            border-radius: 10px;
+        }
+
+        .game-header {
+            position: absolute;
+            top: -60px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .score {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        .lives {
+            display: flex;
+            gap: 5px;
+        }
+
+        .life {
+            width: 25px;
+            height: 25px;
+            background: #FFD700;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .life::before {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid #FFD700;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+
+        .sentence-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #1e3c72;
+            max-width: 250px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .sentence-display .blank {
+            color: #e74c3c;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        .control-pad {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+
+        .control-btn {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #FFD700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:active {
+            background: rgba(255, 215, 0, 0.4);
+            transform: scale(0.95);
+        }
+
+        .btn-up { top: 0; left: 50%; transform: translateX(-50%); }
+        .btn-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .btn-left { left: 0; top: 50%; transform: translateY(-50%); }
+        .btn-right { right: 0; top: 50%; transform: translateY(-50%); }
+
+        .game-over-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .game-over-content {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-over-content h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .final-score {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #FFF;
+        }
+
+        .restart-btn {
+            background: #FFD700;
+            color: #1e3c72;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .start-content {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+        }
+
+        .start-content h1 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .start-content p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #1e3c72;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                display: block;
+            }
+            
+            .sentence-display {
+                font-size: 12px;
+                padding: 10px 15px;
+                max-width: 200px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .game-header {
+                top: -50px;
+                font-size: 14px;
+            }
+            
+            .control-pad {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .control-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <div class="start-content">
+            <h1>🟡 Grammar Pacman 🟡</h1>
+            <p><strong>Help Teacher Rigo collect grammar words!</strong></p>
+            <p>📚 Collect the highlighted words to complete sentences</p>
+            <p>👻 Avoid the ghosts chasing you</p>
+            <p>⌨️ Use arrow keys or on-screen controls to move</p>
+            <p>❤️ You have 3 lives - Good luck!</p>
+            <button class="start-btn" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="game-header">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="lives" id="livesDisplay">
+                <div class="life"></div>
+                <div class="life"></div>
+                <div class="life"></div>
+            </div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="sentence-display" id="sentenceDisplay"></div>
+    </div>
+
+    <div class="controls">
+        <div class="control-pad">
+            <button class="control-btn btn-up" data-dir="up">↑</button>
+            <button class="control-btn btn-down" data-dir="down">↓</button>
+            <button class="control-btn btn-left" data-dir="left">←</button>
+            <button class="control-btn btn-right" data-dir="right">→</button>
+        </div>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <div class="game-over-content">
+            <h2 id="gameOverTitle">Game Over!</h2>
+            <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+            <p id="gameOverMessage"></p>
+            <button class="restart-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game settings
+        const CELL_SIZE = 25;
+        const ROWS = 19;
+        const COLS = 21;
+        canvas.width = COLS * CELL_SIZE;
+        canvas.height = ROWS * CELL_SIZE;
+
+        // Game state
+        let score = 0;
+        let lives = 3;
+        let gameRunning = false;
+        let currentLevel = 0;
+        let animationFrame = 0;
+
+        // Sentences and vocabulary
+        const levels = [
+            {
+                sentence: "Teacher Rigo was teaching _____ the lights went out!",
+                words: ["when", "where", "why", "how"],
+                correct: "when",
+                wrongWords: ["where", "why", "how"]
+            },
+            {
+                sentence: "Students love grammar _____ Teacher Rigo makes it fun!",
+                words: ["because", "although", "unless", "if"],
+                correct: "because",
+                wrongWords: ["although", "unless", "if"]
+            },
+            {
+                sentence: "_____ studying hard, we passed the test!",
+                words: ["After", "Before", "During", "Without"],
+                correct: "After",
+                wrongWords: ["Before", "During", "Without"]
+            },
+            {
+                sentence: "Teacher Rigo dances _____ explains participles!",
+                words: ["while", "where", "when", "which"],
+                correct: "while",
+                wrongWords: ["where", "when", "which"]
+            },
+            {
+                sentence: "We practice grammar _____ we can improve!",
+                words: ["so that", "in case", "as if", "even though"],
+                correct: "so that",
+                wrongWords: ["in case", "as if", "even though"]
+            }
+        ];
+
+        // Maze layout (1 = wall, 0 = path, 2 = vocabulary word, 3 = wrong word)
+        const maze = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,3,1],
+            [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
+            [1,1,1,1,0,0,1,1,1,0,1,0,1,1,1,0,0,1,1,1,1],
+            [1,1,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,1,1,1,1],
+            [1,1,1,1,0,0,1,0,1,0,0,0,1,0,1,0,0,1,1,1,1],
+            [1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1],
+            [1,1,1,1,0,0,1,0,1,1,1,1,1,0,1,0,0,1,1,1,1],
+            [1,1,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,1,1,1,1],
+            [1,1,1,1,0,0,1,0,1,1,1,1,1,0,1,0,0,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1],
+            [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+            [1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1],
+            [1,3,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,2,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        // Create a working copy of the maze
+        let gameMaze = [];
+        let pellets = [];
+        let vocabularyItems = [];
+
+        function resetMaze() {
+            gameMaze = maze.map(row => [...row]);
+            pellets = [];
+            vocabularyItems = [];
+            
+            // Place pellets and track vocabulary positions
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (gameMaze[row][col] === 0) {
+                        pellets.push({x: col, y: row});
+                    } else if (gameMaze[row][col] === 2) {
+                        vocabularyItems.push({
+                            x: col, 
+                            y: row, 
+                            word: levels[currentLevel].correct,
+                            isCorrect: true
+                        });
+                    } else if (gameMaze[row][col] === 3) {
+                        const wrongWord = levels[currentLevel].wrongWords[
+                            Math.floor(Math.random() * levels[currentLevel].wrongWords.length)
+                        ];
+                        vocabularyItems.push({
+                            x: col, 
+                            y: row, 
+                            word: wrongWord,
+                            isCorrect: false
+                        });
+                    }
+                }
+            }
+        }
+
+        // Player (Teacher Rigo Pacman)
+        const player = {
+            x: 10,
+            y: 14,
+            direction: 'right',
+            nextDirection: null,
+            mouthOpen: true,
+            speed: 4
+        };
+
+        // Ghosts
+        const ghosts = [
+            {x: 10, y: 9, color: '#FF0000', direction: 'up', speed: 3},
+            {x: 9, y: 9, color: '#00FFFF', direction: 'down', speed: 3},
+            {x: 11, y: 9, color: '#FFB6C1', direction: 'left', speed: 3},
+            {x: 10, y: 8, color: '#FFA500', direction: 'right', speed: 3}
+        ];
+
+        // Controls
+        const keys = {};
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Mobile controls
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const dir = btn.dataset.dir;
+                player.nextDirection = dir;
+            });
+            
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                player.nextDirection = dir;
+            });
+        });
+
+        function canMove(x, y) {
+            const gridX = Math.round(x);
+            const gridY = Math.round(y);
+            
+            if (gridX < 0 || gridX >= COLS || gridY < 0 || gridY >= ROWS) {
+                return false;
+            }
+            
+            return gameMaze[gridY][gridX] !== 1;
+        }
+
+        function updatePlayer() {
+            // Handle keyboard input
+            if (keys['ArrowUp']) player.nextDirection = 'up';
+            if (keys['ArrowDown']) player.nextDirection = 'down';
+            if (keys['ArrowLeft']) player.nextDirection = 'left';
+            if (keys['ArrowRight']) player.nextDirection = 'right';
+
+            // Try to change direction
+            if (player.nextDirection) {
+                let nextX = player.x;
+                let nextY = player.y;
+                
+                switch(player.nextDirection) {
+                    case 'up': nextY -= 0.2; break;
+                    case 'down': nextY += 0.2; break;
+                    case 'left': nextX -= 0.2; break;
+                    case 'right': nextX += 0.2; break;
+                }
+                
+                if (canMove(nextX, nextY)) {
+                    player.direction = player.nextDirection;
+                    player.nextDirection = null;
+                }
+            }
+
+            // Move in current direction
+            let nextX = player.x;
+            let nextY = player.y;
+            const speed = 0.15;
+            
+            switch(player.direction) {
+                case 'up': nextY -= speed; break;
+                case 'down': nextY += speed; break;
+                case 'left': nextX -= speed; break;
+                case 'right': nextX += speed; break;
+            }
+            
+            if (canMove(nextX, nextY)) {
+                player.x = nextX;
+                player.y = nextY;
+            }
+
+            // Animate mouth
+            if (animationFrame % 8 === 0) {
+                player.mouthOpen = !player.mouthOpen;
+            }
+
+            // Check pellet collection
+            pellets = pellets.filter(pellet => {
+                const dist = Math.abs(pellet.x - Math.round(player.x)) + 
+                            Math.abs(pellet.y - Math.round(player.y));
+                if (dist < 0.5) {
+                    score += 10;
+                    updateScore();
+                    return false;
+                }
+                return true;
+            });
+
+            // Check vocabulary collection
+            vocabularyItems = vocabularyItems.filter(item => {
+                const dist = Math.abs(item.x - Math.round(player.x)) + 
+                            Math.abs(item.y - Math.round(player.y));
+                if (dist < 0.5) {
+                    if (item.isCorrect) {
+                        score += 100;
+                        showMessage("Correct! +" + 100 + " points!", '#00FF00');
+                        checkLevelComplete();
+                    } else {
+                        score -= 50;
+                        showMessage("Wrong word! -50 points!", '#FF0000');
+                    }
+                    updateScore();
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        function updateGhosts() {
+            ghosts.forEach(ghost => {
+                // Simple AI - move randomly but avoid walls
+                if (Math.random() < 0.1) {
+                    const directions = ['up', 'down', 'left', 'right'];
+                    ghost.direction = directions[Math.floor(Math.random() * 4)];
+                }
+                
+                let nextX = ghost.x;
+                let nextY = ghost.y;
+                const speed = 0.1;
+                
+                switch(ghost.direction) {
+                    case 'up': nextY -= speed; break;
+                    case 'down': nextY += speed; break;
+                    case 'left': nextX -= speed; break;
+                    case 'right': nextX += speed; break;
+                }
+                
+                if (canMove(nextX, nextY)) {
+                    ghost.x = nextX;
+                    ghost.y = nextY;
+                } else {
+                    // Change direction if hit wall
+                    const directions = ['up', 'down', 'left', 'right'];
+                    ghost.direction = directions[Math.floor(Math.random() * 4)];
+                }
+                
+                // Check collision with player
+                const dist = Math.abs(ghost.x - player.x) + Math.abs(ghost.y - player.y);
+                if (dist < 0.8) {
+                    loseLife();
+                }
+            });
+        }
+
+        function loseLife() {
+            lives--;
+            updateLives();
+            
+            if (lives <= 0) {
+                gameOver();
+            } else {
+                // Reset positions
+                player.x = 10;
+                player.y = 14;
+                player.direction = 'right';
+                ghosts.forEach((ghost, i) => {
+                    ghost.x = 9 + i;
+                    ghost.y = 9;
+                });
+                showMessage("Life lost! " + lives + " remaining", '#FFA500');
+            }
+        }
+
+        function drawMaze() {
+            // Clear canvas
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw walls
+            ctx.fillStyle = '#0047AB';
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (gameMaze[row][col] === 1) {
+                        ctx.fillRect(
+                            col * CELL_SIZE + 2,
+                            row * CELL_SIZE + 2,
+                            CELL_SIZE - 4,
+                            CELL_SIZE - 4
+                        );
+                    }
+                }
+            }
+            
+            // Draw pellets
+            ctx.fillStyle = '#FFD700';
+            pellets.forEach(pellet => {
+                ctx.beginPath();
+                ctx.arc(
+                    pellet.x * CELL_SIZE + CELL_SIZE/2,
+                    pellet.y * CELL_SIZE + CELL_SIZE/2,
+                    3,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+            });
+            
+            // Draw vocabulary items
+            vocabularyItems.forEach(item => {
+                ctx.save();
+                ctx.fillStyle = item.isCorrect ? '#00FF00' : '#FF69B4';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Draw glowing background
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = item.isCorrect ? '#00FF00' : '#FF69B4';
+                ctx.fillRect(
+                    item.x * CELL_SIZE + 2,
+                    item.y * CELL_SIZE + 2,
+                    CELL_SIZE - 4,
+                    CELL_SIZE - 4
+                );
+                
+                // Draw word
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#000';
+                const words = item.word.split(' ');
+                words.forEach((word, i) => {
+                    ctx.fillText(
+                        word,
+                        item.x * CELL_SIZE + CELL_SIZE/2,
+                        item.y * CELL_SIZE + CELL_SIZE/2 + (i - 0.5) * 10
+                    );
+                });
+                ctx.restore();
+            });
+        }
+
+        function drawPlayer() {
+            ctx.save();
+            ctx.fillStyle = '#FFD700';
+            
+            const x = player.x * CELL_SIZE + CELL_SIZE/2;
+            const y = player.y * CELL_SIZE + CELL_SIZE/2;
+            
+            ctx.beginPath();
+            
+            let startAngle, endAngle;
+            if (player.mouthOpen) {
+                switch(player.direction) {
+                    case 'right':
+                        startAngle = Math.PI * 0.2;
+                        endAngle = Math.PI * 1.8;
+                        break;
+                    case 'left':
+                        startAngle = Math.PI * 1.2;
+                        endAngle = Math.PI * 0.8;
+                        break;
+                    case 'up':
+                        startAngle = Math.PI * 1.7;
+                        endAngle = Math.PI * 1.3;
+                        break;
+                    case 'down':
+                        startAngle = Math.PI * 0.7;
+                        endAngle = Math.PI * 0.3;
+                        break;
+                }
+            } else {
+                startAngle = 0;
+                endAngle = Math.PI * 2;
+            }
+            
+            ctx.arc(x, y, CELL_SIZE/2 - 2, startAngle, endAngle);
+            if (player.mouthOpen) {
+                ctx.lineTo(x, y);
+            }
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawGhosts() {
+            ghosts.forEach(ghost => {
+                ctx.save();
+                ctx.fillStyle = ghost.color;
+                
+                const x = ghost.x * CELL_SIZE + CELL_SIZE/2;
+                const y = ghost.y * CELL_SIZE + CELL_SIZE/2;
+                
+                // Draw ghost body
+                ctx.beginPath();
+                ctx.arc(x, y - 3, CELL_SIZE/2 - 2, Math.PI, 0);
+                ctx.lineTo(x + CELL_SIZE/2 - 2, y + CELL_SIZE/2 - 5);
+                
+                // Wavy bottom
+                for (let i = 0; i < 3; i++) {
+                    ctx.lineTo(
+                        x + CELL_SIZE/2 - 2 - (i+1) * CELL_SIZE/3,
+                        y + CELL_SIZE/2 - 5 + (i % 2) * 3
+                    );
+                }
+                
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw eyes
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(x - 5, y - 3, 3, 0, Math.PI * 2);
+                ctx.arc(x + 5, y - 3, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'black';
+                ctx.beginPath();
+                ctx.arc(x - 5, y - 3, 1.5, 0, Math.PI * 2);
+                ctx.arc(x + 5, y - 3, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            });
+        }
+
+        function updateSentenceDisplay() {
+            const level = levels[currentLevel];
+            const html = level.sentence.replace('_____', '<span class="blank">_____</span>');
+            document.getElementById('sentenceDisplay').innerHTML = html;
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function updateLives() {
+            const livesDisplay = document.getElementById('livesDisplay');
+            livesDisplay.innerHTML = '';
+            for (let i = 0; i < lives; i++) {
+                const life = document.createElement('div');
+                life.className = 'life';
+                livesDisplay.appendChild(life);
+            }
+        }
+
+        function showMessage(text, color) {
+            const msg = document.createElement('div');
+            msg.style.position = 'fixed';
+            msg.style.top = '50%';
+            msg.style.left = '50%';
+            msg.style.transform = 'translate(-50%, -50%)';
+            msg.style.background = color;
+            msg.style.color = 'white';
+            msg.style.padding = '20px 40px';
+            msg.style.borderRadius = '10px';
+            msg.style.fontSize = '24px';
+            msg.style.fontWeight = 'bold';
+            msg.style.zIndex = '999';
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => msg.remove(), 1500);
+        }
+
+        function checkLevelComplete() {
+            const correctCollected = vocabularyItems.filter(item => item.isCorrect).length === 0;
+            
+            if (correctCollected) {
+                currentLevel++;
+                if (currentLevel >= levels.length) {
+                    gameWon();
+                } else {
+                    showMessage("Level Complete! Next level...", '#00FF00');
+                    setTimeout(() => {
+                        resetMaze();
+                        updateSentenceDisplay();
+                        player.x = 10;
+                        player.y = 14;
+                        player.direction = 'right';
+                    }, 2000);
+                }
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('gameOverTitle').textContent = 'Game Over!';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverMessage').textContent = 
+                'Teacher Rigo says: "Practice makes perfect! Try again!"';
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+
+        function gameWon() {
+            gameRunning = false;
+            document.getElementById('gameOverTitle').textContent = '🎉 You Won! 🎉';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverMessage').textContent = 
+                'Teacher Rigo says: "Amazing grammar skills! You\'re a champion!"';
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            gameRunning = true;
+            score = 0;
+            lives = 3;
+            currentLevel = 0;
+            resetMaze();
+            updateScore();
+            updateLives();
+            updateSentenceDisplay();
+            gameLoop();
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            startGame();
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            animationFrame++;
+            
+            updatePlayer();
+            updateGhosts();
+            
+            drawMaze();
+            drawPlayer();
+            drawGhosts();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Check if on mobile device
+        if ('ontouchstart' in window) {
+            document.querySelector('.controls').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

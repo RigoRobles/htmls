@@ -1,0 +1,1429 @@
+--- START OF FILE codexapp.html ---
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>Participle Clauses Masterclass</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+    :root {
+      --primary: #6c5ce7;
+      --secondary: #00b894;
+      --accent: #fd79a8;
+      --background: #0f172a;
+      --surface: rgba(15, 23, 42, 0.85);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top left, #2a9d8f 0%, #1d3557 40%, #0f172a 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    header.top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 110;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(18px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 2.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .logo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      box-shadow: 0 0 12px rgba(253, 121, 168, 0.7);
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
+    .nav-menu a {
+      font-weight: 400;
+      font-size: 0.95rem;
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-menu a:hover::after,
+    .nav-menu a.active::after {
+      transform: scaleX(1);
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.75rem;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .menu-toggle .menu-icon {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .menu-toggle .menu-icon span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 999px;
+    }
+    main {
+      position: relative;
+    }
+
+    section {
+      position: relative;
+      padding: 6rem 10vw;
+    }
+
+    section::before {
+      content: '';
+      position: absolute;
+      inset: 1.5rem;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+
+    section:nth-child(even) {
+      background: rgba(15, 23, 42, 0.35);
+    }
+
+    .hero {
+      min-height: 75vh;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 5rem 8vw;
+      overflow: hidden;
+    }
+
+    #scene {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      filter: saturate(135%);
+    }
+
+    .hero-content {
+      max-width: 560px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.9rem;
+      background: rgba(108, 92, 231, 0.25);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .tag::before {
+      content: '*';
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 4vw, 3.75rem);
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .hero-content p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .nav-btn {
+      padding: 0.85rem 1.75rem;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: var(--text);
+      box-shadow: 0 10px 30px rgba(108, 92, 231, 0.35);
+    }
+
+    .ghost-btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+
+    .hero-stats div {
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 16px;
+      padding: 1.2rem;
+      text-align: center;
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.4);
+    }
+
+    .hero-stats span {
+      display: block;
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .content-section {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-header p {
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .cards-grid {
+      display: grid;
+      gap: 1.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 20px;
+      padding: 1.8rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.35);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(253, 121, 168, 0.6);
+    }
+
+    .card.highlight {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.4), rgba(0, 184, 148, 0.35));
+      border-color: rgba(108, 92, 231, 0.45);
+    }
+
+    .card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0 0.5rem;
+      list-style: none;
+    }
+
+    .chip-list li {
+      background: rgba(148, 163, 184, 0.2);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+    }
+
+    .example {
+      padding: 1rem;
+      background: rgba(148, 163, 184, 0.12);
+      border-radius: 14px;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .mini-labs {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .mini-labs .card {
+      background: rgba(108, 92, 231, 0.25);
+      border-color: rgba(108, 92, 231, 0.35);
+    }
+
+    .step-list {
+      list-style: none;
+      display: grid;
+      gap: 1.4rem;
+      margin-top: 1.5rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .step-item::before {
+      content: attr(data-step);
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .step-item h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .game-area {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 24px;
+      padding: 2rem;
+      border: 1px solid rgba(108, 92, 231, 0.4);
+      box-shadow: 0 22px 48px rgba(15, 23, 42, 0.45);
+    }
+
+    .scoreboard {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .scoreboard div {
+      flex: 1;
+      min-width: 140px;
+      background: rgba(108, 92, 231, 0.2);
+      padding: 0.85rem 1.1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(108, 92, 231, 0.4);
+      font-size: 0.9rem;
+    }
+
+    .scoreboard strong {
+      font-size: 1.2rem;
+      margin-left: 0.3rem;
+      color: var(--text);
+    }
+
+    .option-deck {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+    }
+
+    .option-btn {
+      padding: 0.75rem 1.4rem;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+      font-weight: 600;
+    }
+
+    .option-btn:hover {
+      transform: translateY(-2px);
+      background: rgba(108, 92, 231, 0.35);
+    }
+
+    .option-btn.disabled {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .option-btn.correct {
+      background: rgba(0, 184, 148, 0.35);
+      border-color: rgba(0, 184, 148, 0.6);
+    }
+
+    .option-btn.incorrect {
+      background: rgba(253, 121, 168, 0.25);
+      border-color: rgba(253, 121, 168, 0.5);
+    }
+
+    .game-sentence {
+      font-size: 1.25rem;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .game-context {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .game-feedback {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .game-feedback.correct {
+      color: #7bed9f;
+    }
+
+    .game-feedback.incorrect {
+      color: #ff7675;
+    }
+
+    .summary {
+      margin-top: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      border-radius: 16px;
+      background: rgba(34, 211, 238, 0.15);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .quiz-form {
+      display: grid;
+      gap: 1.75rem;
+    }
+
+    .quiz-question {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 20px;
+      padding: 1.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .quiz-question h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .quiz-question p {
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+    }
+
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .quiz-option input {
+      accent-color: var(--accent);
+      transform: scale(1.08);
+    }
+
+    .quiz-feedback {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      min-height: 1.2rem;
+    }
+
+    .quiz-feedback.correct {
+      color: #7bed9f;
+    }
+
+    .quiz-feedback.incorrect {
+      color: #ff7675;
+    }
+
+    .quiz-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-start;
+    }
+
+    .resource-grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-bottom: 2rem;
+    }
+
+    .reflection {
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 22px;
+      border: 1px solid rgba(0, 184, 148, 0.35);
+      padding: 1.75rem;
+      box-shadow: 0 18px 35px rgba(0, 184, 148, 0.22);
+    }
+
+    .reflection h3 {
+      margin-bottom: 0.6rem;
+    }
+
+    .reflection p {
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .section-nav {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .nav-btn {
+      background: rgba(108, 92, 231, 0.3);
+      border: 1px solid rgba(108, 92, 231, 0.5);
+      color: var(--text);
+    }
+
+    .nav-btn.ghost {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .nav-btn.small {
+      padding: 0.6rem 1.1rem;
+      font-size: 0.85rem;
+    }
+
+    footer {
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.9);
+      border-top: 1px solid var(--border);
+    }
+
+    #backToTop {
+      position: fixed;
+      right: 1.75rem;
+      bottom: 1.75rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      color: var(--text);
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.4);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 150;
+    }
+
+    #backToTop.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95));
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      transition: opacity 0.5s ease;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .overlay-card {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 24px;
+      padding: 2.5rem 2.75rem;
+      border: 1px solid rgba(108, 92, 231, 0.4);
+      box-shadow: 0 26px 55px rgba(15, 23, 42, 0.6);
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .overlay-card h2 {
+      margin-bottom: 0.75rem;
+      font-size: 2rem;
+    }
+
+    .overlay-card p {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .overlay-card input {
+      width: 100%;
+      padding: 0.9rem 1.1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text);
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+    }
+
+    .overlay-card input.shake {
+      animation: shake 0.4s ease;
+      border-color: rgba(253, 121, 168, 0.8);
+    }
+
+    .overlay-tip {
+      font-size: 0.8rem;
+      color: rgba(148, 163, 184, 0.8);
+      line-height: 1.4;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes shake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-6px);
+      }
+      75% {
+        transform: translateX(6px);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      header.top-nav {
+        padding: 0.85rem 1.5rem;
+      }
+
+      .nav-menu {
+        position: absolute;
+        top: 100%;
+        right: 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        background: rgba(15, 23, 42, 0.95);
+        padding: 1.2rem;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        transform: translateY(-20px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .nav-menu.open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .hero {
+        padding: 4rem 6vw;
+      }
+    }
+
+    @media (max-width: 720px) {
+      section {
+        padding: 4.5rem 6vw;
+      }
+
+      section::before {
+        inset: 0.75rem;
+      }
+
+      .hero-stats {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .scoreboard {
+        flex-direction: column;
+      }
+
+      .quiz-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class='overlay' id='nameOverlay' role='dialog' aria-labelledby='overlayTitle' aria-modal='true'>
+    <div class='overlay-card'>
+      <h2 id='overlayTitle'>Welcome, sentence sculptor!</h2>
+      <p>Drop your name so we can personalise every hint, cheer, and nudge throughout this masterclass.</p>
+      <form id='nameForm'>
+        <input type='text' id='learnerNameInput' placeholder='Type your name' autocomplete='off' required>
+        <button type='submit' class='primary-btn'>Start My Journey</button>
+      </form>
+      <p class='overlay-tip'>Your name will appear in encouragements, scoreboards, and feedback so everything feels tailor-made.</p>
+    </div>
+  </div>
+
+  <header class='top-nav' id='topNav'>
+    <div class='brand'><span class='logo-dot'></span> Teacher Rigo Participle Clauses 3000</div>
+    <button class='menu-toggle' id='menuToggle' aria-label='Toggle navigation'>
+      <span class='menu-icon'><span></span><span></span><span></span></span>
+    </button>
+    <nav class='nav-menu' id='navMenu'>
+      <a href='#home' class='active'>Home</a>
+      <a href='#overview'>Overview</a>
+      <a href='#types'>Clause Lab</a>
+      <a href='#strategies'>Strategies</a>
+      <a href='#game'>Game</a>
+      <a href='#quiz'>Quiz</a>
+      <a href='#resources'>Resources</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class='hero' id='home'>
+      <canvas id='scene'></canvas>
+      <div class='hero-content'>
+        <span class='tag'>Advanced Grammar Studio</span>
+        <h1>Hey <span class='learner-name'>trailblazer</span>, let's master participle clauses.</h1>
+        <p id='personalGreeting'>Condense ideas, add detail, and refine flow with interactive labs, live feedback, and challenges that feel like a game.</p>
+        <div class='hero-actions'>
+          <a class='primary-btn' href='#overview'>Explore the Lesson</a>
+          <a class='ghost-btn' href='#game'>Jump into the Game</a>
+        </div>
+        <div class='hero-stats'>
+          <div><span>3</span> clause types</div>
+          <div><span>8</span> usage functions</div>
+          <div><span>100%</span> feedback-driven</div>
+        </div>
+      </div>
+    </section>
+
+    <section id='overview' class='content-section'>
+      <div class='section-header'>
+        <h2>Why Participle Clauses Elevate Your English</h2>
+        <p>Participle clauses are linguistic power tools that allow you to combine sentences, reduce wordiness, and express complex relationships (time, cause, condition, concession) with elegant concision. Mastering them makes your writing more sophisticated and your speech more fluent.</p>
+      </div>
+      <div class='grid three'>
+        <article class='card highlight'>
+          <h3>Concise & elegant expression</h3>
+          <p>Condense two sentences into one, making your writing more compact and impactful without losing information.</p>
+          <div class='example'>Example: &ldquo;He read the letter. He smiled.&rdquo; &rarr; &ldquo;<strong>Reading the letter</strong>, he smiled.&rdquo;</div>
+        </article>
+        <article class='card'>
+          <h3>Enhanced flow & rhythm</h3>
+          <p>Participle clauses create smooth transitions between ideas, improving the overall readability and musicality of your prose.</p>
+          <div class='example'>"The report, <strong>written by experts</strong>, highlighted key issues." (Adds detail smoothly).</div>
+        </article>
+        <article class='card'>
+          <h3>Academic & formal tone</h3>
+          <p>Frequently used in academic and formal contexts, they signal advanced grammatical control, crucial for exams and professional communication.</p>
+          <div class='example'><strong>Having analysed the data</strong>, we can conclude that... (Formal, shows completed prior action).</div>
+        </article>
+      </div>
+      <div class='section-nav'>
+        <button class='nav-btn' data-target='#types'>Next: Participle Clause Lab &rarr;</button>
+      </div>
+    </section>
+
+    <section id='types' class='content-section'>
+      <div class='section-header'>
+        <h2>The Participle Clause Lab</h2>
+        <p>Explore the main types of participle clauses and their powerful functions. Each lab entry provides structure, usage notes, and model sentences.</p>
+      </div>
+      <div class='cards-grid'>
+        <article class='card'>
+          <h3>Present Participle Clauses (-ing)</h3>
+          <p>Used to describe actions happening at the same time as the main verb, or to explain cause/reason, or consequence.</p>
+          <ul class='chip-list'>
+            <li>Same time: "Smiling broadly, she greeted them."</li>
+            <li>Cause/Reason: "Feeling tired, he went to bed early."</li>
+            <li>Result: "He slipped on the ice, breaking his arm."</li>
+          </ul>
+          <div class='example'>&ldquo;<strong>Walking into the room</strong>, she noticed the strange silence.&rdquo; (Simultaneous)</div>
+        </article>
+        <article class='card'>
+          <h3>Past Participle Clauses (-ed/irregular)</h3>
+          <p>Used to describe an action that happened before the main verb, or to provide additional information in a passive sense.</p>
+          <ul class='chip-list'>
+            <li>Before main action: "Alarmed by the noise, she called the police."</li>
+            <li>Passive sense: "Built in the 18th century, the house is very old."</li>
+            <li>Condition: "Given more time, we could have improved the project."</li>
+          </ul>
+          <div class='example'>&ldquo;<strong>Motivated by a desire for change</strong>, the community started a new initiative.&rdquo; (Reason)</div>
+        </article>
+        <article class='card'>
+          <h3>Perfect Participle Clauses (Having -ed)</h3>
+          <p>Emphasize that an action was completed *before* the main action, often indicating cause or sequence.</p>
+          <ul class='chip-list'>
+            <li>Prior action: "Having finished the report, I submitted it."</li>
+            <li>Cause: "Having failed the test twice, he decided to get a tutor."</li>
+            <li>Passive: "Having been warned, they proceeded cautiously."</li>
+          </ul>
+          <div class='example'>&ldquo;<strong>Having completed the experiment</strong>, the scientists published their findings.&rdquo; (Action completed first)</div>
+        </article>
+        <article class='card'>
+          <h3>Absolute Participle Clauses</h3>
+          <p>Provide additional information or context for the main clause, often with its own subject, independent of the main clause's subject.</p>
+          <ul class='chip-list'>
+            <li>"The sun having set, we lit candles."</li>
+            <li>"His homework done, he could relax."</li>
+            <li>"All things considered, it was a good outcome."</li>
+          </ul>
+          <div class='example'>&ldquo;<strong>Her enthusiasm infectious</strong>, the team felt energized.&rdquo; (Independent contextual info)</div>
+        </article>
+      </div>
+      <div class='mini-labs'>
+        <article class='card'>
+          <h3>Subject consistency</h3>
+          <p>Ensure the implied subject of your participle clause is the same as the subject of the main clause to avoid dangling participles.</p>
+        </article>
+        <article class='card'>
+          <h3>Meaning check</h3>
+          <p>Determine the exact relationship (time, cause, result) you want to express. This dictates the best participle form.</p>
+        </article>
+        <article class='card'>
+          <h3>Placement flexibility</h3>
+          <p>Participle clauses can often appear at the beginning, middle (after a comma), or end of a sentence for stylistic variation.</p>
+        </article>
+      </div>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#overview'>&larr; Back to Overview</button>
+        <button class='nav-btn' data-target='#strategies'>Next: Strategies &amp; Style &rarr;</button>
+      </div>
+    </section>
+    <section id='strategies' class='content-section'>
+      <div class='section-header'>
+        <h2>Strategies for High-Impact Participle Use</h2>
+        <p>Translate knowledge into craft. Use these workflows before, during, and after writing to integrate participle clauses seamlessly.</p>
+      </div>
+      <ul class='step-list'>
+        <li class='step-item' data-step='1'>
+          <div>
+            <h4>Identify opportunities for concision</h4>
+            <p>Look for sentences connected by "and," "because," "while," "when," or "after" that share a subject. These are prime candidates for a participle clause.</p>
+          </div>
+        </li>
+        <li class='step-item' data-step='2'>
+          <div>
+            <h4>Vary clause types intentionally</h4>
+            <p>Don't stick to just "-ing" forms. Experiment with past participles for passive meaning, and perfect participles for sequential actions to add depth.</p>
+          </div>
+        </li>
+        <li class='step-item' data-step='3'>
+          <div>
+            <h4>Check for dangling participles</h4>
+            <p>After writing, ensure the subject of the participle clause clearly refers to the subject of the main clause. If not, rephrase to avoid ambiguity.</p>
+          </div>
+        </li>
+        <li class='step-item' data-step='4'>
+          <div>
+            <h4>Read aloud for rhythm</h4>
+            <p>Participle clauses often enhance the flow. Read your sentences aloud to check if they sound natural and sophisticated, not forced.</p>
+          </div>
+        </li>
+      </ul>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#types'>&larr; Back to Lab</button>
+        <button class='nav-btn' data-target='#game'>Challenge Me &rarr;</button>
+      </div>
+    </section>
+
+    <section id='game' class='content-section'>
+      <div class='section-header'>
+        <h2>The Participle Clause Challenge</h2>
+        <p>Transform verbose sentences into elegant ones using participle clauses. Gain points and feedback as you master sentence compression.</p>
+      </div>
+      <div class='game-area'>
+        <div class='scoreboard'>
+          <div>Round<strong id='gameRound'>0</strong>/<strong id='gameTotal'>0</strong></div>
+          <div>Score<strong id='gameScore'>0</strong></div>
+          <div>Streak<strong id='gameStreak'>0</strong></div>
+        </div>
+        <div id='gameIntro'>
+          <p>Hit start to face six scenarios. Read the original sentences, then tap the participle clause that correctly combines them. Earn bonus energy with streaks!</p>
+        </div>
+        <button id='gameStart' class='primary-btn'>Start the Challenge</button>
+        <div id='gameCard' class='card hidden'>
+          <div class='game-sentence' id='gameSentence'></div>
+          <div class='game-context' id='gameContext'></div>
+          <div class='option-deck' id='gameOptions'></div>
+          <div class='game-feedback' id='gameFeedback'></div>
+          <button id='gameNext' class='ghost-btn small hidden'>Next Prompt &rarr;</button>
+        </div>
+        <div id='gameSummary' class='summary hidden'></div>
+      </div>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#strategies'>&larr; Back to Strategies</button>
+        <button class='nav-btn' data-target='#quiz'>Ready for the Quiz &rarr;</button>
+      </div>
+    </section>
+    <section id='quiz' class='content-section'>
+      <div class='section-header'>
+        <h2>Self-Grading Quiz</h2>
+        <p>Show what you know. Each answer triggers instant feedback. Miss one? You will see an explanation plus a suggestion tailored to you.</p>
+      </div>
+      <form id='quizForm' class='quiz-form'>
+        <div class='quiz-question' data-answer='Feeling overwhelmed'>
+          <h3>1. Choose the best participle clause for:</h3>
+          <p>He felt overwhelmed by the tasks, so he asked for an extension.</p>
+          <label class='quiz-option'><input type='radio' name='q1' value='Feeling overwhelmed'> Feeling overwhelmed</label>
+          <label class='quiz-option'><input type='radio' name='q1' value='Having felt overwhelmed'> Having felt overwhelmed</label>
+          <label class='quiz-option'><input type='radio' name='q1' value='Overwhelmed was feeling'> Overwhelmed was feeling</label>
+          <div class='quiz-feedback'></div>
+        </div>
+        <div class='quiz-question' data-answer='Having completed her training'>
+          <h3>2. Which participle clause correctly shows a prior completed action?</h3>
+          <p>She completed her training. Then, she applied for the promotion.</p>
+          <label class='quiz-option'><input type='radio' name='q2' value='Completing her training'> Completing her training</label>
+          <label class='quiz-option'><input type='radio' name='q2' value='Having completed her training'> Having completed her training</label>
+          <label class='quiz-option'><input type='radio' name='q2' value='Trained completely'> Trained completely</label>
+          <div class='quiz-feedback'></div>
+        </div>
+        <div class='quiz-question' data-answer='Built in the 15th century'>
+          <h3>3. Choose the past participle clause for:</h3>
+          <p>The castle was built in the 15th century. It stands majestically on the hill.</p>
+          <label class='quiz-option'><input type='radio' name='q3' value='Building in the 15th century'> Building in the 15th century</label>
+          <label class='quiz-option'><input type='radio' name='q3' value='Built in the 15th century'> Built in the 15th century</label>
+          <label class='quiz-option'><input type='radio' name='q3' value='Having built in the 15th century'> Having built in the 15th century</label>
+          <div class='quiz-feedback'></div>
+        </div>
+        <div class='quiz-question' data-answer='The weather improving'>
+          <h3>4. Select the correct absolute participle clause:</h3>
+          <p>The weather was improving, so we decided to go for a hike.</p>
+          <label class='quiz-option'><input type='radio' name='q4' value='Improving the weather'> Improving the weather</label>
+          <label class='quiz-option'><input type='radio' name='q4' value='The weather improving'> The weather improving</label>
+          <label class='quiz-option'><input type='radio' name='q4' value='Improved by the weather'> Improved by the weather</label>
+          <div class='quiz-feedback'></div>
+        </div>
+        <div class='quiz-controls'>
+          <button type='submit' class='primary-btn'>Grade My Answers</button>
+          <button type='button' id='retakeQuiz' class='ghost-btn'>Reset Quiz</button>
+        </div>
+      </form>
+      <div id='quizSummary' class='summary'></div>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#game'>&larr; Back to Game</button>
+        <button class='nav-btn' data-target='#resources'>Explore Resources &rarr;</button>
+      </div>
+    </section>
+
+    <section id='resources' class='content-section'>
+      <div class='section-header'>
+        <h2>Extend the Learning</h2>
+        <p>Translate insight into action. Use these resources to reinforce participle clauses in your daily writing practice.</p>
+      </div>
+      <div class='resource-grid'>
+        <article class='card'>
+          <h3>Condensing sentences drill</h3>
+          <p>Take any paragraph and identify 3-5 opportunities to replace full clauses with participle clauses for concision.</p>
+          <ul class='chip-list'>
+            <li>Look for "who is/was" clauses</li>
+            <li>Combine sentences with shared subjects</li>
+            <li>Replace adverbial clauses (e.g., "when he arrived" -> "arriving")</li>
+          </ul>
+        </article>
+        <article class='card'>
+          <h3>Journaling with participles</h3>
+          <p>Write a short journal entry focusing on using at least one present, past, and perfect participle clause.</p>
+        </article>
+        <article class='card'>
+          <h3>Passive voice transformation</h3>
+          <p>Practice converting passive sentences into participle clauses where appropriate to make writing more active and direct.</p>
+        </article>
+      </div>
+      <div class='reflection'>
+        <h3>Reflect &amp; plan ahead</h3>
+        <p>Jot down two situations where you can immediately apply a participle clause in your writing this week. Challenge yourself to spot them in professional articles.</p>
+        <button class='primary-btn' data-target='#home'>Return to Top</button>
+      </div>
+      <div class='section-nav'>
+        <button class='nav-btn ghost' data-target='#quiz'>&larr; Back to Quiz</button>
+        <button class='nav-btn' data-target='#home'>Back to Home &uarr;</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Crafted with curiosity for advanced English explorers. Keep sculpting sentences, <span class='learner-name'>word artist</span>!
+  </footer>
+
+  <button id='backToTop' aria-label='Back to top'>&uarr;</button>
+
+  <script src='https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js'></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('nameOverlay');
+      const nameForm = document.getElementById('nameForm');
+      const nameInput = document.getElementById('learnerNameInput');
+      const nameTargets = document.querySelectorAll('.learner-name');
+      const greeting = document.getElementById('personalGreeting');
+      const navMenu = document.getElementById('navMenu');
+      const menuToggle = document.getElementById('menuToggle');
+      const navLinks = navMenu.querySelectorAll('a');
+      const targetButtons = document.querySelectorAll('[data-target]');
+      const backToTop = document.getElementById('backToTop');
+
+      const gameStart = document.getElementById('gameStart');
+      const gameCard = document.getElementById('gameCard');
+      const gameSentence = document.getElementById('gameSentence');
+      const gameContext = document.getElementById('gameContext');
+      const gameOptions = document.getElementById('gameOptions');
+      const gameFeedback = document.getElementById('gameFeedback');
+      const gameNext = document.getElementById('gameNext');
+      const gameSummary = document.getElementById('gameSummary');
+      const gameRound = document.getElementById('gameRound');
+      const gameTotal = document.getElementById('gameTotal');
+      const gameScore = document.getElementById('gameScore');
+      const gameStreak = document.getElementById('gameStreak');
+
+      const quizForm = document.getElementById('quizForm');
+      const quizSummary = document.getElementById('quizSummary');
+      const retakeQuiz = document.getElementById('retakeQuiz');
+
+      let learnerName = 'trailblazer';
+
+      function personalise(name) {
+        learnerName = name;
+        nameTargets.forEach(el => el.textContent = name);
+        greeting.textContent = `${name}, let's push your sentence structure beyond the basics with nuanced participle clauses that wow examiners.`;
+      }
+
+      nameForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const value = nameInput.value.trim();
+        if (!value) {
+          nameInput.classList.add('shake');
+          nameInput.placeholder = 'Please share your name!';
+          setTimeout(() => nameInput.classList.remove('shake'), 400);
+          return;
+        }
+        personalise(value);
+        overlay.classList.add('hidden');
+        setTimeout(() => overlay.style.display = 'none', 600);
+      });
+
+      menuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('open');
+      });
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          navMenu.classList.remove('open');
+          navLinks.forEach(item => item.classList.remove('active'));
+          link.classList.add('active');
+        });
+      });
+
+      targetButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const target = button.getAttribute('data-target');
+          if (target) {
+            const el = document.querySelector(target);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
+        });
+      });
+
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) {
+          backToTop.classList.add('show');
+        } else {
+          backToTop.classList.remove('show');
+        }
+      });
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = '#' + entry.target.id;
+            navLinks.forEach(link => {
+              link.classList.toggle('active', link.getAttribute('href') === id);
+            });
+          }
+        });
+      }, {
+        threshold: 0.4
+      });
+
+      document.querySelectorAll('main section').forEach(section => observer.observe(section));
+
+      // NEW: Game Slides for Participle Clauses
+      const gameSlides = [
+        {
+          sentence: 'Original: She sang joyfully and walked down the street.',
+          context: 'Combine these actions happening simultaneously using a present participle.',
+          options: ['Singing joyfully', 'Having sung joyfully', 'Sung joyfully'],
+          answer: 'Singing joyfully',
+          feedback: 'Correct! "Singing joyfully" describes an action happening at the same time as walking.'
+        },
+        {
+          sentence: 'Original: The book was written in the 19th century. It offers unique insights.',
+          context: 'Use a past participle clause to introduce information about the book.',
+          options: ['Writing in the 19th century', 'Written in the 19th century', 'Having written in the 19th century'],
+          answer: 'Written in the 19th century',
+          feedback: 'Spot on! "Written in the 19th century" is a past participle clause acting passively.'
+        },
+        {
+          sentence: 'Original: He had finished his homework. He then went out to play.',
+          context: 'Show that the homework was completed before he went out, using a perfect participle.',
+          options: ['Finishing his homework', 'Finished his homework', 'Having finished his homework'],
+          answer: 'Having finished his homework',
+          feedback: 'Excellent! "Having finished" clearly indicates the completion of an action prior to another.'
+        },
+        {
+          sentence: 'Original: Because she felt tired, she decided to take a nap.',
+          context: 'Transform this cause-effect relationship into a present participle clause.',
+          options: ['Feeling tired', 'Felt tired', 'To feel tired'],
+          answer: 'Feeling tired',
+          feedback: 'That\'s right! "Feeling tired" concisely explains the reason for her nap.'
+        },
+        {
+          sentence: 'Original: They saw the danger. They immediately called for help.',
+          context: 'Use a past participle clause for the reason for calling help (passive meaning implied).',
+          options: ['Seeing the danger', 'Having seen the danger', 'Seen the danger'],
+          answer: 'Having seen the danger',
+          feedback: 'Exactly! "Having seen the danger" shows the completed prior action leading to the call for help.'
+        },
+        {
+          sentence: 'Original: The meeting was over. We all went home.',
+          context: 'Use an absolute participle clause to provide context for leaving.',
+          options: ['Over the meeting', 'The meeting over', 'Having the meeting over'],
+          answer: 'The meeting over',
+          feedback: 'Fantastic! "The meeting over" is an absolute participle clause, giving independent context.'
+        }
+      ];
+
+      let gameIndex = 0;
+      let score = 0;
+      let streak = 0;
+
+      gameTotal.textContent = gameSlides.length.toString();
+
+      function renderGameSlide() {
+        const current = gameSlides[gameIndex];
+        gameRound.textContent = (gameIndex + 1).toString();
+        gameSentence.innerHTML = current.sentence; // No replacement, show original verbose
+        gameContext.textContent = current.context;
+        gameFeedback.textContent = '';
+        gameFeedback.className = 'game-feedback';
+        gameNext.classList.add('hidden');
+        gameOptions.innerHTML = '';
+        current.options.forEach(option => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn';
+          btn.type = 'button';
+          btn.textContent = option;
+          btn.addEventListener('click', () => evaluateGameAnswer(option, btn, current));
+          gameOptions.appendChild(btn);
+        });
+      }
+
+      function evaluateGameAnswer(selection, button, slide) {
+        const buttons = gameOptions.querySelectorAll('button');
+        buttons.forEach(btn => btn.classList.add('disabled'));
+        const correct = selection === slide.answer;
+        if (correct) {
+          score += 1;
+          streak += 1;
+          gameFeedback.textContent = `Nice choice, ${learnerName}! "${selection}" is the best participle clause here. ${slide.feedback}`;
+          gameFeedback.classList.add('correct');
+        } else {
+          streak = 0;
+          gameFeedback.innerHTML = `Almost! The correct answer was <strong>"${slide.answer}"</strong>. ${slide.feedback}`;
+          gameFeedback.classList.add('incorrect');
+        }
+        gameScore.textContent = score.toString();
+        gameStreak.textContent = streak.toString();
+        gameNext.classList.remove('hidden');
+        if (correct) {
+          button.classList.add('correct');
+        } else {
+          button.classList.add('incorrect');
+        }
+      }
+
+      gameNext.addEventListener('click', () => {
+        gameIndex += 1;
+        if (gameIndex < gameSlides.length) {
+          renderGameSlide();
+        } else {
+          finishGame();
+        }
+      });
+
+      function finishGame() {
+        gameCard.classList.add('hidden');
+        gameSummary.classList.remove('hidden');
+        const remark = score === gameSlides.length
+          ? `Flawless! Your participle clause instincts are elite, ${learnerName}.`
+          : score >= gameSlides.length - 1
+            ? 'Strong work! A quick review of participle forms will make you unstoppable.'
+            : 'Great hustle! Revisit the lab and replay to lock in those tricky participle clauses.';
+        gameSummary.innerHTML = `<strong>Score:</strong> ${score}/${gameSlides.length}<br>${remark}`;
+        gameStart.textContent = 'Play Again';
+        gameStart.classList.remove('hidden');
+      }
+
+      gameStart.addEventListener('click', () => {
+        gameStart.classList.add('hidden');
+        gameSummary.classList.add('hidden');
+        gameCard.classList.remove('hidden');
+        gameIndex = 0;
+        score = 0;
+        streak = 0;
+        gameRound.textContent = '1';
+        gameScore.textContent = '0';
+        gameStreak.textContent = '0';
+        renderGameSlide();
+      });
+
+      quizForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        let total = 0;
+        let correct = 0;
+        quizSummary.textContent = '';
+        quizForm.querySelectorAll('.quiz-question').forEach((question) => {
+          const answer = question.getAttribute('data-answer');
+          const feedback = question.querySelector('.quiz-feedback');
+          const checked = question.querySelector('input[type=radio]:checked');
+          total += 1;
+          if (!checked) {
+            feedback.textContent = 'Select an option to receive feedback.';
+            feedback.className = 'quiz-feedback';
+            return;
+          }
+          if (checked.value === answer) {
+            correct += 1;
+            feedback.textContent = `Spot on, ${learnerName}! That participle clause nails the nuance.`;
+            feedback.className = 'quiz-feedback correct';
+          } else {
+            feedback.textContent = `Not quite. Try "${answer}" to express the intended relationship with precision.`;
+            feedback.className = 'quiz-feedback incorrect';
+          }
+        });
+        quizSummary.textContent = `${learnerName}, you scored ${correct}/${total}. ${correct === total ? 'You just proved you can deploy advanced participle clauses with style.' : 'Review the explanations above, revisit the lab, and retake the quiz to cement every nuance.'}`;
+      });
+
+      retakeQuiz.addEventListener('click', () => {
+        quizForm.reset();
+        quizSummary.textContent = '';
+        quizForm.querySelectorAll('.quiz-feedback').forEach(feedback => {
+          feedback.textContent = '';
+          feedback.className = 'quiz-feedback';
+        });
+      });
+
+      const heroSection = document.querySelector('.hero');
+      const canvas = document.getElementById('scene');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(55, heroSection.clientWidth / heroSection.clientHeight, 0.1, 1000);
+      camera.position.z = 18;
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+      scene.add(ambient);
+
+      const light = new THREE.PointLight(0xffffff, 1.2);
+      light.position.set(18, 16, 10);
+      scene.add(light);
+
+      const group = new THREE.Group();
+      for (let i = 0; i < 18; i += 1) {
+        const geometry = new THREE.DodecahedronGeometry(Math.random() * 1.2 + 0.8);
+        const color = new THREE.Color().setHSL(Math.random(), 0.6, 0.5);
+        const material = new THREE.MeshStandardMaterial({
+          color,
+          emissive: new THREE.Color(0x111111),
+          metalness: 0.2,
+          roughness: 0.35
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set((Math.random() - 0.5) * 22, (Math.random() - 0.5) * 12, (Math.random() - 0.5) * 18);
+        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        mesh.userData.spin = Math.random() * 0.01 + 0.003;
+        group.add(mesh);
+      }
+      scene.add(group);
+
+      const starGeometry = new THREE.BufferGeometry();
+      const starCount = 450;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount; i += 1) {
+        starPositions[i * 3] = (Math.random() - 0.5) * 70;
+        starPositions[i * 3 + 1] = (Math.random() - 0.5) * 40;
+        starPositions[i * 3 + 2] = (Math.random() - 0.5) * 70;
+      }
+      starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.25, transparent: true, opacity: 0.55 });
+      const stars = new THREE.Points(starGeometry, starMaterial);
+      scene.add(stars);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        group.rotation.y += 0.0012;
+        group.children.forEach(mesh => {
+          mesh.rotation.x += mesh.userData.spin;
+          mesh.rotation.y += mesh.userData.spin * 0.8;
+        });
+        stars.rotation.y += 0.0005;
+        renderer.render(scene, camera);
+      }
+
+      function onResize() {
+        const width = heroSection.clientWidth;
+        const height = heroSection.clientHeight;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      }
+
+      window.addEventListener('resize', onResize);
+      onResize();
+      animate();
+    });
+  </script>
+</body>
+</html>

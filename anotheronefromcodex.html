@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Teacher Rigo Grammar Arcade</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #17153B, #2E236C, #43358C);
+            --panel-bg: rgba(22, 22, 43, 0.8);
+            --accent: #FFCC00;
+            --accent-strong: #FF9900;
+            --text-primary: #F5F5F7;
+            --text-secondary: #C2C6FF;
+            --button-bg: rgba(255, 255, 255, 0.12);
+            --button-hover: rgba(255, 204, 0, 0.2);
+            --success: #74F0ED;
+            --danger: #FF6B6B;
+            --card-back: #6A5ACD;
+            --card-front: #2E236C;
+            font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            scroll-behavior: smooth;
+        }
+
+        body.lock-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        body.lock-scroll:after {
+            content: "Drag mode on";
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(255, 204, 0, 0.95);
+            color: #1B1035;
+            padding: 0.6rem 1rem;
+            border-radius: 999px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 999;
+        }
+
+        .app {
+            width: min(1100px, 100vw);
+            padding: clamp(1rem, 2vw, 2rem);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        header.top-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(23, 21, 59, 0.95);
+            backdrop-filter: blur(6px);
+            border-radius: 24px;
+            padding: clamp(1rem, 2vw, 1.5rem);
+            box-shadow: 0 20px 40px rgba(9, 9, 24, 0.6);
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+            letter-spacing: 0.04em;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        .pacman-score {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.6rem 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+
+        .pacman-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--accent);
+            position: relative;
+            clip-path: polygon(50% 50%, 100% 25%, 100% 75%);
+        }
+
+        .pacman-icon:before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 6px solid var(--accent);
+            border-right-color: transparent;
+            transform: rotate(20deg);
+        }
+
+        .score-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .score-text strong {
+            font-size: 1.2rem;
+            letter-spacing: 0.05em;
+        }
+
+        .score-text span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 999px;
+            background: var(--button-bg);
+            color: var(--text-primary);
+            padding: 0.65rem 1.3rem;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover,
+        button:focus-visible {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #FFC400, #FF9100);
+            color: #1B1035;
+        }
+
+        button.primary:hover,
+        button.primary:focus-visible {
+            background: linear-gradient(135deg, #FFDE59, #FFB347);
+        }
+
+        .intro {
+            background: var(--panel-bg);
+            padding: clamp(1rem, 2vw, 1.5rem);
+            border-radius: 20px;
+            box-shadow: 0 25px 45px rgba(10, 10, 30, 0.55);
+            display: grid;
+            gap: 1rem;
+        }
+
+        .intro p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .intro .name-entry {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            padding: 0.65rem 1rem;
+            border-radius: 12px;
+            border: none;
+            width: 220px;
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+            font-size: 1rem;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        nav.main-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+        }
+
+        nav.main-menu button {
+            padding: 0.85rem 1.2rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            justify-content: center;
+        }
+
+        nav.main-menu button.active {
+            background: rgba(255, 204, 0, 0.25);
+            box-shadow: 0 12px 30px rgba(255, 204, 0, 0.25);
+            color: var(--accent);
+        }
+
+        .game-panel {
+            display: none;
+            background: var(--panel-bg);
+            border-radius: 22px;
+            padding: clamp(1.2rem, 2.4vw, 2rem);
+            box-shadow: 0 35px 55px rgba(6, 6, 20, 0.6);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .game-panel.active {
+            display: block;
+        }
+
+        .game-panel h2 {
+            margin-top: 0;
+            font-size: clamp(1.4rem, 2.2vw, 2rem);
+            letter-spacing: 0.04em;
+        }
+
+        .hint {
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+            font-size: 0.95rem;
+        }
+
+        .notification {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .drag-area {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .drag-banks {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .draggable-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .draggable {
+            padding: 0.7rem 1rem;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            padding: 1rem;
+            min-height: 90px;
+            display: grid;
+            gap: 0.5rem;
+            background: rgba(13, 11, 31, 0.45);
+            position: relative;
+        }
+
+        .drop-zone.correct {
+            border-color: var(--success);
+            box-shadow: 0 0 25px rgba(116, 240, 237, 0.4);
+        }
+
+        .drop-zone span.label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+        }
+
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .quiz-options button {
+            justify-content: flex-start;
+            padding: 0.85rem 1rem;
+        }
+
+        .quiz-options button.correct {
+            background: rgba(116, 240, 237, 0.2);
+            border: 1px solid rgba(116, 240, 237, 0.6);
+        }
+
+        .quiz-options button.incorrect {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.6);
+        }
+
+        .quiz-timer {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .memory-card {
+            position: relative;
+            aspect-ratio: 3 / 4;
+            perspective: 1200px;
+            cursor: pointer;
+        }
+
+        .memory-inner {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .memory-card.flipped .memory-inner,
+        .memory-card.matched .memory-inner {
+            transform: rotateY(180deg);
+        }
+
+        .memory-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 18px 35px rgba(5, 5, 20, 0.45);
+        }
+
+        .memory-face.back {
+            background: var(--card-back);
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .memory-face.front {
+            background: var(--card-front);
+            transform: rotateY(180deg);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .memory-card.matched .memory-face.front {
+            border: 2px solid var(--success);
+            box-shadow: 0 0 25px rgba(116, 240, 237, 0.5);
+        }
+
+        .correct-pop {
+            animation: correctPop 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes correctPop {
+            0% {
+                transform: scale(1);
+            }
+            40% {
+                transform: scale(1.18);
+            }
+            80% {
+                transform: scale(0.92);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .top-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .score-display {
+                margin-left: 0;
+            }
+
+            nav.main-menu button {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                font-size: 15px;
+            }
+
+            header.top-bar {
+                padding: 1rem;
+            }
+
+            .memory-grid {
+                grid-template-columns: repeat(2, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="top-bar">
+            <div class="top-row">
+                <div class="brand">
+                    <div id="pacmanCanvas" aria-hidden="true"></div>
+                    <h1>Teacher Rigo Grammar Arcade</h1>
+                </div>
+                <div class="score-display">
+                    <div class="pacman-score">
+                        <div class="pacman-icon" aria-hidden="true"></div>
+                        <div class="score-text">
+                            <strong id="playerLabel">Player: Teacher Rigo</strong>
+                            <span>Total Score: <span id="score">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="scrollToggle" class="primary" aria-pressed="false">Enable Drag Mode</button>
+                <button id="showMenu">Menu</button>
+            </div>
+            <nav class="main-menu" id="mainMenu">
+                <button data-target="discourse-game" class="active">Discourse Marker Drop</button>
+                <button data-target="linking-quiz">Linking Word Lightning</button>
+                <button data-target="participle-memory">Participle Memory Match</button>
+            </nav>
+        </header>
+
+        <section class="intro" id="intro">
+            <p>Welcome, language adventurer! This arcade is specially powered by <strong>Teacher Rigo</strong>'s grammar wizardry. Pop in your name, smash the start button, and let's collect knowledge pellets.</p>
+            <div class="name-entry">
+                <label for="playerName">Enter your name:</label>
+                <input id="playerName" type="text" value="Teacher Rigo" autocomplete="name" placeholder="Your legendary alias">
+                <button id="startBtn" class="primary">Start the Arcade</button>
+            </div>
+            <p class="hint">Tip: Toggle <strong>Drag Mode</strong> when playing the drag & drop game on phones to stop accidental scrolling.</p>
+        </section>
+
+        <section id="discourse-game" class="game-panel active" aria-labelledby="discourse-title">
+            <h2 id="discourse-title">Discourse Marker Drop</h2>
+            <p class="hint">Drag each discourse marker to the Teacher Rigo scenario where it fits best. These examples are extra silly on purpose�just like Teacher Rigo's lesson warm-ups.</p>
+            <div class="drag-area">
+                <div class="draggable-list" id="markerBank"></div>
+                <div class="drag-banks" id="dropZones"></div>
+            </div>
+            <div class="notification" id="dragNotice"></div>
+        </section>
+
+        <section id="linking-quiz" class="game-panel" aria-labelledby="quiz-title">
+            <h2 id="quiz-title">Linking Word Lightning Round</h2>
+            <p class="hint">You have 40 seconds to wow Teacher Rigo. Pick the linking word that makes the sentence sparkle.</p>
+            <div class="quiz-card">
+                <div class="quiz-info">
+                    <span class="quiz-timer">Time Left: <span id="timer">40</span>s</span>
+                    <span id="quizProgress">Question 1 of 5</span>
+                </div>
+                <p id="quizQuestion"></p>
+                <div class="quiz-options" id="quizOptions"></div>
+                <div class="notification" id="quizNotice"></div>
+                <button id="restartQuiz">Restart Quiz</button>
+            </div>
+        </section>
+
+        <section id="participle-memory" class="game-panel" aria-labelledby="memory-title">
+            <h2 id="memory-title">Participle Clause Memory Match</h2>
+            <p class="hint">Flip the cards to pair the participle clause with its definition. Teacher Rigo swears these sentences came from very serious grammar scientists.</p>
+            <div class="memory-grid" id="memoryGrid"></div>
+            <div class="notification" id="memoryNotice"></div>
+            <div class="controls">
+                <button id="restartMemory">Shuffle Cards</button>
+            </div>
+        </section>
+
+        <footer>
+            Powered by p5.js animations and Teacher Rigo's playful grammar magic.
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script>
+        // Placeholder for interactive logic. Full functionality added below.
+    </script>
+</body>
+</html>

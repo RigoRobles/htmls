@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D PDF Book Reader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #8B4513 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #F5DEB3;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .upload-container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #F5DEB3;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .upload-container:hover {
+            border-color: #FFD700;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .upload-container input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #CD853F, #DEB887);
+            color: #8B4513;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+        }
+
+        .upload-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #DEB887, #F5DEB3);
+        }
+
+        .book-container {
+            perspective: 2000px;
+            display: none;
+            margin: 20px auto;
+        }
+
+        .book {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: 50px auto;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .book-spine {
+            position: absolute;
+            left: -10px;
+            top: 0;
+            width: 20px;
+            height: 600px;
+            background: linear-gradient(to right, #654321, #8B4513, #654321);
+            transform: rotateY(-90deg);
+            transform-origin: right center;
+            box-shadow: inset 2px 0 5px rgba(0,0,0,0.3);
+        }
+
+        .page {
+            position: absolute;
+            width: 400px;
+            height: 600px;
+            background: #FFFEF7;
+            border: 1px solid #E6E6E6;
+            transform-origin: left center;
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 
+                2px 2px 10px rgba(0,0,0,0.1),
+                inset 1px 1px 0 rgba(255,255,255,0.8);
+            overflow: hidden;
+            backface-visibility: hidden;
+        }
+
+        .page-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+        }
+
+        .page-content canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 12px;
+            color: #666;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .left-page {
+            left: 0;
+            background: linear-gradient(to right, #FFFEF7 0%, #F8F8F8 100%);
+        }
+
+        .right-page {
+            right: 0;
+            background: linear-gradient(to left, #FFFEF7 0%, #F8F8F8 100%);
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        .page.flipping {
+            transform: rotateY(-90deg);
+            z-index: 10;
+        }
+
+        .controls {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls.active {
+            display: flex;
+        }
+
+        .nav-button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #CD853F, #DEB887);
+            color: #8B4513;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+        }
+
+        .nav-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #DEB887, #F5DEB3);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: #F5DEB3;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            margin: 0 20px;
+            min-width: 120px;
+        }
+
+        .loading {
+            color: #F5DEB3;
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .error {
+            color: #FF6B6B;
+            text-align: center;
+            margin: 20px;
+            padding: 15px;
+            background: rgba(255,107,107,0.1);
+            border-radius: 10px;
+            border: 1px solid #FF6B6B;
+        }
+
+        @keyframes pageFlip {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(-90deg); }
+            100% { transform: rotateY(-180deg); }
+        }
+
+        @keyframes pageFlipBack {
+            0% { transform: rotateY(-180deg); }
+            50% { transform: rotateY(-90deg); }
+            100% { transform: rotateY(0deg); }
+        }
+
+        .page.animating-forward {
+            animation: pageFlip 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .page.animating-backward {
+            animation: pageFlipBack 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @media (max-width: 900px) {
+            .book {
+                width: 600px;
+                height: 450px;
+                transform: scale(0.8);
+            }
+            
+            .page {
+                width: 300px;
+                height: 450px;
+            }
+            
+            .book-spine {
+                height: 450px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .book {
+                width: 400px;
+                height: 300px;
+                transform: scale(0.7);
+            }
+            
+            .page {
+                width: 200px;
+                height: 300px;
+            }
+            
+            .book-spine {
+                height: 300px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 3D PDF Book Reader</h1>
+        <p>Upload a PDF and watch it come to life as a beautiful book</p>
+    </div>
+
+    <div class="upload-container">
+        <input type="file" id="pdfFile" accept=".pdf">
+        <label for="pdfFile" class="upload-label">
+            Choose PDF File
+        </label>
+        <p style="color: #F5DEB3; margin-top: 15px;">Select a PDF to transform into an interactive book</p>
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">
+        Loading your book... Please wait ✨
+    </div>
+
+    <div id="error" class="error" style="display: none;"></div>
+
+    <div id="bookContainer" class="book-container">
+        <div class="book" id="book">
+            <div class="book-spine"></div>
+        </div>
+    </div>
+
+    <div id="controls" class="controls">
+        <button id="prevBtn" class="nav-button">← Previous</button>
+        <div id="pageInfo" class="page-info">Page 1 of 1</div>
+        <button id="nextBtn" class="nav-button">Next →</button>
+    </div>
+
+    <script>
+        class BookReader {
+            constructor() {
+                this.pdf = null;
+                this.currentPage = 1;
+                this.totalPages = 0;
+                this.pages = [];
+                this.isAnimating = false;
+                
+                this.initializeElements();
+                this.bindEvents();
+            }
+
+            initializeElements() {
+                this.fileInput = document.getElementById('pdfFile');
+                this.bookContainer = document.getElementById('bookContainer');
+                this.book = document.getElementById('book');
+                this.loading = document.getElementById('loading');
+                this.error = document.getElementById('error');
+                this.controls = document.getElementById('controls');
+                this.prevBtn = document.getElementById('prevBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.pageInfo = document.getElementById('pageInfo');
+            }
+
+            bindEvents() {
+                this.fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+                this.prevBtn.addEventListener('click', () => this.previousPage());
+                this.nextBtn.addEventListener('click', () => this.nextPage());
+                
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft') this.previousPage();
+                    if (e.key === 'ArrowRight') this.nextPage();
+                });
+            }
+
+            async handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                this.showLoading();
+                this.hideError();
+
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    this.pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    this.totalPages = this.pdf.numPages;
+                    
+                    await this.renderBook();
+                    this.showBook();
+                    this.hideLoading();
+                } catch (error) {
+                    console.error('Error loading PDF:', error);
+                    this.showError('Error loading PDF. Please make sure it\'s a valid PDF file.');
+                    this.hideLoading();
+                }
+            }
+
+            async renderBook() {
+                // Clear existing pages
+                const existingPages = this.book.querySelectorAll('.page');
+                existingPages.forEach(page => page.remove());
+                this.pages = [];
+
+                // Create pages (showing 2 at a time like a real book)
+                for (let i = 1; i <= this.totalPages; i++) {
+                    const pageElement = await this.createPageElement(i);
+                    this.pages.push(pageElement);
+                    this.book.appendChild(pageElement);
+                }
+
+                this.currentPage = 1;
+                this.updatePageDisplay();
+                this.updateControls();
+            }
+
+            async createPageElement(pageNum) {
+                const page = await this.pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1 });
+                
+                // Calculate scale to fit page
+                const maxWidth = 360;
+                const maxHeight = 560;
+                const scale = Math.min(maxWidth / viewport.width, maxHeight / viewport.height);
+                const scaledViewport = page.getViewport({ scale });
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = scaledViewport.width;
+                canvas.height = scaledViewport.height;
+
+                await page.render({
+                    canvasContext: ctx,
+                    viewport: scaledViewport
+                }).promise;
+
+                const pageElement = document.createElement('div');
+                pageElement.className = `page ${pageNum % 2 === 1 ? 'right-page' : 'left-page'}`;
+                pageElement.style.zIndex = this.totalPages - pageNum + 1;
+
+                const content = document.createElement('div');
+                content.className = 'page-content';
+                content.appendChild(canvas);
+
+                const pageNumber = document.createElement('div');
+                pageNumber.className = 'page-number';
+                pageNumber.textContent = pageNum;
+                content.appendChild(pageNumber);
+
+                pageElement.appendChild(content);
+
+                // Set initial position for odd pages (they start flipped)
+                if (pageNum > 1) {
+                    pageElement.classList.add('flipped');
+                }
+
+                return pageElement;
+            }
+
+            updatePageDisplay() {
+                // Update which pages are visible
+                this.pages.forEach((page, index) => {
+                    const pageNum = index + 1;
+                    page.style.display = '';
+                    
+                    if (pageNum < this.currentPage) {
+                        page.classList.add('flipped');
+                    } else {
+                        page.classList.remove('flipped');
+                    }
+                });
+            }
+
+            async nextPage() {
+                if (this.isAnimating || this.currentPage >= this.totalPages) return;
+                
+                this.isAnimating = true;
+                const currentPageElement = this.pages[this.currentPage - 1];
+                
+                currentPageElement.classList.add('animating-forward');
+                
+                setTimeout(() => {
+                    currentPageElement.classList.remove('animating-forward');
+                    currentPageElement.classList.add('flipped');
+                    this.currentPage++;
+                    this.updateControls();
+                    this.isAnimating = false;
+                }, 800);
+            }
+
+            async previousPage() {
+                if (this.isAnimating || this.currentPage <= 1) return;
+                
+                this.isAnimating = true;
+                this.currentPage--;
+                const currentPageElement = this.pages[this.currentPage - 1];
+                
+                currentPageElement.classList.add('animating-backward');
+                
+                setTimeout(() => {
+                    currentPageElement.classList.remove('animating-backward');
+                    currentPageElement.classList.remove('flipped');
+                    this.updateControls();
+                    this.isAnimating = false;
+                }, 800);
+            }
+
+            updateControls() {
+                this.prevBtn.disabled = this.currentPage <= 1;
+                this.nextBtn.disabled = this.currentPage >= this.totalPages;
+                this.pageInfo.textContent = `Page ${this.currentPage} of ${this.totalPages}`;
+            }
+
+            showLoading() {
+                this.loading.style.display = 'block';
+            }
+
+            hideLoading() {
+                this.loading.style.display = 'none';
+            }
+
+            showError(message) {
+                this.error.textContent = message;
+                this.error.style.display = 'block';
+            }
+
+            hideError() {
+                this.error.style.display = 'none';
+            }
+
+            showBook() {
+                this.bookContainer.style.display = 'block';
+                this.controls.classList.add('active');
+            }
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set PDF.js worker
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            
+            // Create the book reader instance
+            new BookReader();
+        });
+    </script>
+</body>
+</html>

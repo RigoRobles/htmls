@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Lego Sentence Builder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            --panel-bg: rgba(13, 24, 43, 0.78);
+            --accent: #ffdd57;
+            --accent-strong: #ff9f1c;
+            --text-soft: rgba(255, 255, 255, 0.78);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at top left, #1f4776, #0b1e33 65%, #050b12 100%);
+            color: #ffffff;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 28px;
+            background: rgba(2, 7, 15, 0.35);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: 0.02em;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            gap: 24px;
+            padding: 18px 28px 32px;
+            flex-wrap: wrap;
+        }
+
+        .ui-panel {
+            width: 320px;
+            max-width: 100%;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+            border-radius: 18px;
+            padding: 18px 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        #three-container {
+            flex: 1;
+            min-height: 520px;
+            min-width: 400px;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: linear-gradient(160deg, rgba(26, 53, 84, 0.58), rgba(10, 18, 29, 0.9));
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.55);
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.06), transparent 55%);
+        }
+
+        .game-buttons {
+            display: grid;
+            gap: 10px;
+        }
+
+        .game-buttons button {
+            all: unset;
+            cursor: pointer;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid transparent;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .game-buttons button:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .game-buttons button.active {
+            border-color: var(--accent);
+            background: rgba(255, 213, 79, 0.28);
+            color: #ffffff;
+        }
+
+        .stats {
+            display: grid;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .stats-row span.value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-soft);
+        }
+
+        input[type="checkbox"] {
+            width: 44px;
+            height: 22px;
+            appearance: none;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            position: relative;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        input[type="checkbox"]::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            top: 1px;
+            left: 2px;
+            transition: transform 0.2s ease;
+        }
+
+        input[type="checkbox"]:checked {
+            background: rgba(255, 213, 79, 0.6);
+            border-color: rgba(255, 221, 87, 0.9);
+        }
+
+        input[type="checkbox"]:checked::after {
+            transform: translateX(20px);
+        }
+
+        .message {
+            min-height: 48px;
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--accent);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .instructions {
+            flex: 1 1 100%;
+            max-width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 18px 22px;
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .instructions h2 {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        .hint {
+            background: rgba(255, 255, 255, 0.09);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-top: 8px;
+            color: #f2f2f2;
+            font-weight: 500;
+        }
+
+        .legend {
+            font-size: 0.88rem;
+            opacity: 0.8;
+        }
+
+        #timerDisplay {
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent);
+            font-size: 1.2rem;
+            z-index: 100;
+        }
+
+        @media (max-width: 1180px) {
+            main {
+                flex-direction: column;
+            }
+
+            .ui-panel {
+                width: 100%;
+                order: 2;
+            }
+
+            #three-container {
+                min-height: 420px;
+                order: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Lego Sentence Builder</h1>
+        <div class="legend">Drag the colourful bricks into the slots to build the sentence.</div>
+    </header>
+    <main>
+        <aside class="ui-panel">
+            <div>
+                <div class="section-title">Choose a challenge</div>
+                <div class="game-buttons">
+                    <button data-game="discourse" class="active">Discourse Markers</button>
+                    <button data-game="linking">Linking Words</button>
+                    <button data-game="participle">Participle Clauses</button>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stats-row">
+                    <span>Game</span>
+                    <span id="gameTitle">Discourse Markers</span>
+                </div>
+                <div class="stats-row">
+                    <span>Round</span>
+                    <span id="roundInfo">1 of 3</span>
+                </div>
+                <div class="stats-row">
+                    <span>Score</span>
+                    <span id="scoreValue" class="value">0</span>
+                </div>
+                <div class="stats-row">
+                    <span>Timer</span>
+                    <span id="timerDisplay">Timer off</span>
+                </div>
+            </div>
+            <div class="toggle">
+                <label for="timerToggle">
+                    <input type="checkbox" id="timerToggle" />
+                    Timed rounds (75s)
+                </label>
+                <button id="nextRound" style="all: unset; cursor: pointer; padding: 8px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.14); font-weight: 600;">Skip →</button>
+            </div>
+            <div class="message" id="message">Arrange the bricks so they read smoothly from left to right.</div>
+            <div class="hint">
+                <strong>Hint:</strong>
+                <span id="hintText">Place the discourse marker at the beginning to guide the reader.</span>
+            </div>
+        </aside>
+        <section id="three-container">
+            <div id="loading">Loading...</div>
+            <div class="canvas-overlay"></div>
+        </section>
+        <section class="instructions">
+            <h2>How to play</h2>
+            <p>
+                Each challenge focuses on a different type of connector. Drag the 3D lego bricks so that the words line up in a grammatical sentence. When every slot is filled, the game will score your sentence automatically. Correct sentences award 10 points.
+            </p>
+            <p>
+                If you enable the timer, you have 75 seconds to complete the sentence. When the time runs out, you move on to the next round automatically. Use the skip button whenever you want a fresh sentence.
+            </p>
+            <p>
+                The colours, sizes, and studs help you keep track of each brick while you rotate or drag them into position. Build confidently and explore how discourse markers, linking words, and participle clauses connect ideas.
+            </p>
+        </section>
+    </main>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Wait for Three.js to load
+        if (typeof THREE === 'undefined') {
+            document.getElementById('loading').textContent = 'Error: Unable to load 3D library. Please check your internet connection.';
+        } else {
+            initializeGame();
+        }
+
+        function initializeGame() {
+            const legoGameData = {
+                discourse: {
+                    title: "Discourse Markers",
+                    hint: "Use discourse markers to signal order, contrast, or consequence.",
+                    sentences: [
+                        {
+                            words: ["Firstly", "we", "will", "examine", "the", "evidence."],
+                            tip: "Lead with an ordering marker such as firstly, secondly, or finally."
+                        },
+                        {
+                            words: ["In", "contrast,", "the", "second", "author", "argues", "otherwise."],
+                            tip: "Contrastive markers highlight opposing viewpoints."
+                        },
+                        {
+                            words: ["As", "a", "result,", "the", "policy", "was", "revised", "immediately."],
+                            tip: "Causal markers like 'as a result' link actions to outcomes."
+                        }
+                    ]
+                },
+                linking: {
+                    title: "Linking Words",
+                    hint: "Linking words connect clauses smoothly.",
+                    sentences: [
+                        {
+                            words: ["I", "enjoy", "hiking", "because", "it", "clears", "my", "mind."],
+                            tip: "'Because' introduces the reason for an action."
+                        },
+                        {
+                            words: ["She", "grabbed", "a", "coat", "so", "that", "she", "would", "stay", "warm."],
+                            tip: "'So that' expresses purpose."
+                        },
+                        {
+                            words: ["You", "can", "stay", "here", "or", "you", "can", "come", "with", "us."],
+                            tip: "Coordinating conjunctions join options of equal weight."
+                        }
+                    ]
+                },
+                participle: {
+                    title: "Participle Clauses",
+                    hint: "Participle clauses compress information into a single clause.",
+                    sentences: [
+                        {
+                            words: ["Feeling", "exhausted,", "he", "collapsed", "onto", "the", "sofa."],
+                            tip: "An -ing participle clause gives a reason or background."
+                        },
+                        {
+                            words: ["Having", "finished", "the", "report,", "Maria", "emailed", "her", "manager."],
+                            tip: "Perfect participles show a completed action before another."
+                        },
+                        {
+                            words: ["Built", "in", "1920,", "the", "bridge", "still", "looks", "impressive."],
+                            tip: "Past participles can introduce descriptive clauses."
+                        }
+                    ]
+                }
+            };
+
+            const container = document.getElementById("three-container");
+            const scoreValue = document.getElementById("scoreValue");
+            const roundInfo = document.getElementById("roundInfo");
+            const gameTitle = document.getElementById("gameTitle");
+            const message = document.getElementById("message");
+            const hintText = document.getElementById("hintText");
+            const timerToggle = document.getElementById("timerToggle");
+            const timerDisplay = document.getElementById("timerDisplay");
+            const skipButton = document.getElementById("nextRound");
+            const gameButtons = document.querySelectorAll(".game-buttons button");
+            const loadingDiv = document.getElementById("loading");
+
+            let scene, camera, renderer, raycaster;
+            let boardGroup, slotGroup, dragPlane;
+            let draggableBlocks = [];
+            let slotState = [];
+            let slotPositions = [];
+            let currentSentence = null;
+            let currentWords = [];
+            let gameQueue = [];
+            let activeKey = "discourse";
+            let roundIndex = 0;
+            let score = 0;
+            let timerInterval = null;
+            let timedMode = false;
+            let timeLeft = 0;
+            let selectedBlock = null;
+            let intersection = new THREE.Vector3();
+            let offset = new THREE.Vector3();
+            let pointer = new THREE.Vector2();
+            let roundLocked = false;
+
+            const TIME_LIMIT = 75;
+            const BLOCK_HEIGHT = 0.6;
+
+            const legoPalette = [
+                0xff595e, // Red
+                0xffca3a, // Yellow
+                0x8ac926, // Green
+                0x1982c4, // Blue
+                0x6a4c93, // Purple
+                0x00b4d8, // Light Blue
+                0xff9f1c, // Orange
+                0x2ec4b6  // Teal
+            ];
+
+            initScene();
+            attachUIListeners();
+            startGame(activeKey);
+
+            function initScene() {
+                try {
+                    scene = new THREE.Scene();
+                    scene.background = new THREE.Color(0x07111f);
+
+                    const width = container.clientWidth || 800;
+                    const height = container.clientHeight || 600;
+
+                    camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+                    camera.position.set(0, 7, 14);
+                    camera.lookAt(0, 0.5, 0);
+
+                    renderer = new THREE.WebGLRenderer({ antialias: true });
+                    renderer.setPixelRatio(window.devicePixelRatio);
+                    renderer.setSize(width, height);
+                    renderer.shadowMap.enabled = true;
+                    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                    
+                    // Hide loading message
+                    loadingDiv.style.display = 'none';
+                    
+                    container.appendChild(renderer.domElement);
+
+                    // Lighting
+                    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x0a0a0a, 0.55);
+                    scene.add(hemiLight);
+
+                    const dirLight = new THREE.DirectionalLight(0xffffff, 0.94);
+                    dirLight.position.set(6, 10, 8);
+                    dirLight.castShadow = true;
+                    dirLight.shadow.camera.near = 0.5;
+                    dirLight.shadow.camera.far = 30;
+                    dirLight.shadow.camera.left = -15;
+                    dirLight.shadow.camera.right = 15;
+                    dirLight.shadow.camera.top = 15;
+                    dirLight.shadow.camera.bottom = -15;
+                    dirLight.shadow.mapSize.set(2048, 2048);
+                    scene.add(dirLight);
+
+                    const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+                    scene.add(ambientLight);
+
+                    // Floor
+                    const floorGeo = new THREE.PlaneGeometry(36, 24);
+                    const floorMat = new THREE.MeshStandardMaterial({
+                        color: 0x0e1a2b,
+                        metalness: 0.1,
+                        roughness: 0.8
+                    });
+                    const floor = new THREE.Mesh(floorGeo, floorMat);
+                    floor.rotation.x = -Math.PI / 2;
+                    floor.position.y = 0;
+                    floor.receiveShadow = true;
+                    scene.add(floor);
+
+                    boardGroup = new THREE.Group();
+                    scene.add(boardGroup);
+
+                    slotGroup = new THREE.Group();
+                    scene.add(slotGroup);
+
+                    raycaster = new THREE.Raycaster();
+                    dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+                    // Event listeners
+                    renderer.domElement.addEventListener("pointerdown", onPointerDown);
+                    renderer.domElement.addEventListener("pointermove", onPointerMove);
+                    renderer.domElement.addEventListener("pointerup", onPointerUp);
+                    renderer.domElement.addEventListener("pointerleave", onPointerUp);
+
+                    window.addEventListener("resize", onWindowResize);
+
+                    // Animation loop
+                    animate();
+
+                } catch (error) {
+                    console.error('Error initializing scene:', error);
+                    loadingDiv.textContent = 'Error initializing 3D scene. Please refresh the page.';
+                }
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+                gentlyBobBlocks();
+            }
+
+            function attachUIListeners() {
+                gameButtons.forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        if (btn.dataset.game === activeKey) return;
+                        gameButtons.forEach((b) => b.classList.remove("active"));
+                        btn.classList.add("active");
+                        startGame(btn.dataset.game);
+                    });
+                });
+
+                timerToggle.addEventListener("change", () => {
+                    timedMode = timerToggle.checked;
+                    resetTimer();
+                });
+
+                skipButton.addEventListener("click", () => {
+                    if (roundLocked) return;
+                    message.textContent = "Skipping to a new sentence.";
+                    nextRound();
+                });
+            }
+
+            function startGame(key) {
+                activeKey = key;
+                const data = legoGameData[key];
+                gameTitle.textContent = data.title;
+                message.textContent = "Arrange the bricks so they read smoothly from left to right.";
+                hintText.textContent = data.hint;
+                score = 0;
+                scoreValue.textContent = score;
+                roundIndex = 0;
+                gameQueue = shuffle(data.sentences.slice());
+                roundLocked = false;
+                startRound();
+            }
+
+            function startRound() {
+                clearBoard();
+                resetTimer();
+                
+                if (roundIndex >= gameQueue.length) {
+                    message.textContent = "Great job! Choose another game or replay to keep practicing.";
+                    roundInfo.textContent = `${gameQueue.length} of ${gameQueue.length}`;
+                    return;
+                }
+
+                currentSentence = gameQueue[roundIndex];
+                currentWords = currentSentence.words.slice();
+                const shuffledWords = shuffle(currentWords.slice());
+                hintText.textContent = currentSentence.tip || legoGameData[activeKey].hint;
+                roundInfo.textContent = `${roundIndex + 1} of ${gameQueue.length}`;
+
+                setupSlots(currentWords.length);
+                spawnBlocks(shuffledWords);
+                message.textContent = "Drag each lego so the sentence reads correctly from left to right.";
+                roundLocked = false;
+            }
+
+            function setupSlots(count) {
+                slotPositions = [];
+                slotState = Array(count).fill(null);
+                
+                // Clear existing slots
+                while (slotGroup.children.length > 0) {
+                    const child = slotGroup.children[0];
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) child.material.dispose();
+                    slotGroup.remove(child);
+                }
+
+                const spacing = 2.2;
+                const slotMat = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.2,
+                    roughness: 0.4,
+                    metalness: 0.1
+                });
+
+                for (let i = 0; i < count; i++) {
+                    const geo = new THREE.BoxGeometry(1.9, 0.2, 1.4);
+                    const slot = new THREE.Mesh(geo, slotMat.clone());
+                    slot.position.set((i - (count - 1) / 2) * spacing, 0.1, 0);
+                    slot.receiveShadow = false;
+                    slot.userData.index = i;
+                    slotGroup.add(slot);
+                    slotPositions.push(slot.position.clone());
+                }
+            }
+
+            function spawnBlocks(words) {
+                draggableBlocks = [];
+                const radius = 5;
+                words.forEach((word, i) => {
+                    const color = legoPalette[i % legoPalette.length];
+                    const block = createLegoBlock(word, color);
+                    const angle = (i / words.length) * Math.PI * 2;
+                    const distance = radius * 0.7 + Math.random() * (radius * 0.4);
+                    block.position.set(
+                        Math.cos(angle) * distance, 
+                        BLOCK_HEIGHT / 2, 
+                        Math.sin(angle) * distance + 2.5
+                    );
+                    block.rotation.x = 0;
+                    block.rotation.y = Math.random() * Math.PI * 2;
+                    block.rotation.z = 0;
+                    boardGroup.add(block);
+                    draggableBlocks.push(block);
+                });
+            }
+
+            function createLegoBlock(word, color) {
+                const letters = Math.max(2, word.length);
+                const studs = Math.max(2, Math.round(letters / 2));
+                const width = studs * 0.8;
+                const depth = 1.2;
+
+                const geo = new THREE.BoxGeometry(width, BLOCK_HEIGHT, depth);
+                
+                // Create base material
+                const baseMat = new THREE.MeshStandardMaterial({
+                    color: color,
+                    metalness: 0.2,
+                    roughness: 0.45
+                });
+
+                // Create texture for top and front faces with black text
+                const topTexture = buildLabelTexture(word, color);
+                const textMat = new THREE.MeshStandardMaterial({ 
+                    map: topTexture, 
+                    roughness: 0.35, 
+                    metalness: 0.1 
+                });
+
+                // Materials array for BoxGeometry faces
+                // Order: right, left, top, bottom, front, back
+                const materials = [
+                    baseMat,  // right
+                    baseMat,  // left
+                    textMat,  // top - text visible from above
+                    baseMat,  // bottom
+                    textMat,  // front - text visible from front
+                    baseMat   // back
+                ];
+
+                const blockMesh = new THREE.Mesh(geo, materials);
+                blockMesh.castShadow = true;
+                blockMesh.receiveShadow = true;
+
+                // Create studs
+                const studsGroup = new THREE.Group();
+                const studGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.18, 12);
+                const studMat = new THREE.MeshStandardMaterial({
+                    color: lightenColor(color, 0.14),
+                    metalness: 0.15,
+                    roughness: 0.35
+                });
+
+                for (let i = 0; i < studs; i++) {
+                    const stud = new THREE.Mesh(studGeo, studMat);
+                    const offsetX = ((i - (studs - 1) / 2) * 0.82);
+                    stud.position.set(offsetX, BLOCK_HEIGHT / 2 + 0.08, 0);
+                    stud.castShadow = true;
+                    studsGroup.add(stud);
+                }
+
+                const block = new THREE.Group();
+                block.add(blockMesh);
+                block.add(studsGroup);
+                block.userData = {
+                    word: word,
+                    color: color,
+                    studs: studs,
+                    width: width,
+                    currentSlot: null,
+                    originalMaterials: materials
+                };
+                
+                return block;
+            }
+
+            function buildLabelTexture(text, color) {
+                const canvas = document.createElement("canvas");
+                canvas.width = 512;
+                canvas.height = 256;
+                const ctx = canvas.getContext("2d");
+                
+                // Background - slightly lighter version of the block color
+                const r = (color >> 16) & 0xff;
+                const g = (color >> 8) & 0xff;
+                const b = color & 0xff;
+                
+                // Make background 20% lighter for better contrast with black text
+                const lighten = 1.2;
+                const lr = Math.min(255, r * lighten);
+                const lg = Math.min(255, g * lighten);
+                const lb = Math.min(255, b * lighten);
+                
+                ctx.fillStyle = `rgb(${lr}, ${lg}, ${lb})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Add a subtle darker border
+                ctx.strokeStyle = `rgba(0, 0, 0, 0.2)`;
+                ctx.lineWidth = 8;
+                ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
+                
+                // Text - black for maximum readability
+                ctx.fillStyle = "rgba(0, 0, 0, 0.95)";
+                ctx.font = "bold 72px Arial, sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.shadowColor = "rgba(255, 255, 255, 0.3)";
+                ctx.shadowBlur = 2;
+                ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.needsUpdate = true;
+                return texture;
+            }
+
+            function onPointerDown(event) {
+                if (roundLocked) return;
+                updatePointer(event);
+                raycaster.setFromCamera(pointer, camera);
+                const intersects = raycaster.intersectObjects(draggableBlocks, true);
+                
+                if (intersects.length > 0) {
+                    let object = intersects[0].object;
+                    while (object && !object.userData.word && object.parent) {
+                        object = object.parent;
+                    }
+                    if (object && object.userData.word) {
+                        selectedBlock = object;
+                        dragPlane.setFromNormalAndCoplanarPoint(
+                            new THREE.Vector3(0, 1, 0), 
+                            selectedBlock.position
+                        );
+                        offset.copy(intersects[0].point).sub(selectedBlock.position);
+                        highlightSlots(selectedBlock, true);
+                        selectedBlock.position.y = BLOCK_HEIGHT / 2 + 0.2;
+                    }
+                }
+            }
+
+            function onPointerMove(event) {
+                updatePointer(event);
+                if (!selectedBlock) return;
+                
+                raycaster.setFromCamera(pointer, camera);
+                if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
+                    selectedBlock.position.copy(intersection.sub(offset));
+                    selectedBlock.position.y = BLOCK_HEIGHT / 2 + 0.2;
+                }
+            }
+
+            function onPointerUp() {
+                if (!selectedBlock) return;
+                
+                highlightSlots(selectedBlock, false);
+                const slotIndex = findClosestSlot(selectedBlock.position);
+                
+                if (slotIndex !== null) {
+                    snapToSlot(selectedBlock, slotIndex);
+                } else {
+                    selectedBlock.position.y = BLOCK_HEIGHT / 2;
+                    selectedBlock.rotation.x = 0; // Reset tilt for floating blocks
+                }
+                
+                selectedBlock = null;
+                checkForCompletion();
+            }
+
+            function updatePointer(event) {
+                const rect = renderer.domElement.getBoundingClientRect();
+                pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            }
+
+            function findClosestSlot(position) {
+                let closestIndex = null;
+                let minDistance = Infinity;
+                
+                slotPositions.forEach((slotPos, index) => {
+                    const d = new THREE.Vector2(position.x, position.z).distanceTo(
+                        new THREE.Vector2(slotPos.x, slotPos.z)
+                    );
+                    if (d < minDistance) {
+                        minDistance = d;
+                        closestIndex = index;
+                    }
+                });
+                
+                return minDistance < 1.2 ? closestIndex : null;
+            }
+
+            function snapToSlot(block, slotIndex) {
+                const previous = block.userData.currentSlot;
+                if (previous !== null && slotState[previous] === block) {
+                    slotState[previous] = null;
+                }
+                
+                const occupying = slotState[slotIndex];
+                if (occupying && occupying !== block) {
+                    occupying.userData.currentSlot = null;
+                    occupying.position.x = (Math.random() - 0.5) * 8;
+                    occupying.position.z = (Math.random() - 0.5) * 4 + 3;
+                    occupying.position.y = BLOCK_HEIGHT / 2;
+                    occupying.rotation.x = 0; // Reset tilt
+                    occupying.rotation.y = Math.random() * Math.PI * 2;
+                    occupying.rotation.z = 0;
+                }
+                
+                slotState[slotIndex] = block;
+                block.userData.currentSlot = slotIndex;
+                const target = slotPositions[slotIndex];
+                block.position.set(target.x, BLOCK_HEIGHT / 2 + 0.05, target.z);
+                
+                // Slight tilt to show both top and front faces clearly
+                block.rotation.x = -0.1;
+                block.rotation.y = 0;
+                block.rotation.z = 0;
+            }
+
+            function checkForCompletion() {
+                if (slotState.length === 0) return;
+                
+                const filled = slotState.every((block) => block !== null);
+                if (!filled) return;
+                
+                roundLocked = true;
+                const correct = slotState.every((block, idx) => 
+                    block.userData.word === currentWords[idx]
+                );
+                
+                if (correct) {
+                    score += 10;
+                    scoreValue.textContent = score;
+                    message.textContent = "Brilliant! That's a perfectly linked sentence.";
+                    highlightBlocks(true);
+                } else {
+                    message.textContent = "Almost! Check the order of your connectors and try again next round.";
+                    highlightBlocks(false);
+                }
+                
+                clearTimer();
+                setTimeout(() => {
+                    nextRound();
+                }, 2000);
+            }
+
+            function nextRound() {
+                roundIndex += 1;
+                if (roundIndex >= gameQueue.length) {
+                    message.textContent = `Game complete! Final score: ${score}. Click a game above to play again.`;
+                    roundInfo.textContent = `${gameQueue.length} of ${gameQueue.length}`;
+                    roundLocked = true;
+                } else {
+                    roundLocked = false;
+                    startRound();
+                }
+            }
+
+            function highlightBlocks(success) {
+                draggableBlocks.forEach((block) => {
+                    const base = block.children[0];
+                    if (!base || !Array.isArray(base.material)) return;
+
+                    const targetColor = success === true ? 0x8ac926 :
+                                      success === false ? 0xff595e :
+                                      block.userData.color;
+
+                    base.material.forEach((mat, index) => {
+                        // Skip index 2 (top) and index 4 (front) as they have text textures
+                        if (index !== 2 && index !== 4) {
+                            mat.color.set(targetColor);
+                        }
+                    });
+                });
+            }
+
+            function highlightSlots(block, active) {
+                slotGroup.children.forEach((slot) => {
+                    const color = active ? 0xfff2b0 : 0xffffff;
+                    const opacity = active ? 0.35 : 0.2;
+                    slot.material.color.setHex(color);
+                    slot.material.opacity = opacity;
+                });
+            }
+
+            function gentlyBobBlocks() {
+                const time = performance.now() * 0.0006;
+                draggableBlocks.forEach((block, index) => {
+                    if (block === selectedBlock || block.userData.currentSlot !== null) {
+                        // Keep blocks in slots at their fixed position with tilt
+                        if (block.userData.currentSlot !== null) {
+                            block.rotation.x = -0.1;
+                        }
+                        return;
+                    }
+                    block.position.y = BLOCK_HEIGHT / 2 + Math.sin(time + index) * 0.05;
+                    block.rotation.x = 0; // Reset rotation for floating blocks
+                });
+            }
+
+            function clearBoard() {
+                while (boardGroup.children.length > 0) {
+                    const child = boardGroup.children[0];
+                    boardGroup.remove(child);
+                    disposeBlock(child);
+                }
+                draggableBlocks = [];
+            }
+
+            function disposeBlock(object) {
+                if (!object) return;
+                object.traverse((child) => {
+                    if (child.isMesh) {
+                        if (child.geometry) child.geometry.dispose();
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(material => {
+                                if (material.map) material.map.dispose();
+                                material.dispose();
+                            });
+                        } else if (child.material) {
+                            if (child.material.map) child.material.map.dispose();
+                            child.material.dispose();
+                        }
+                    }
+                });
+            }
+
+            function shuffle(array) {
+                const newArray = [...array];
+                for (let i = newArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+                return newArray;
+            }
+
+            function resetTimer() {
+                clearTimer();
+                if (!timedMode) {
+                    timerDisplay.textContent = "Timer off";
+                    return;
+                }
+                timeLeft = TIME_LIMIT;
+                timerDisplay.textContent = `${timeLeft}s`;
+                timerInterval = setInterval(() => {
+                    timeLeft -= 1;
+                    timerDisplay.textContent = `${timeLeft}s`;
+                    if (timeLeft <= 0) {
+                        message.textContent = "Time's up! Moving to the next sentence.";
+                        clearTimer();
+                        roundLocked = true;
+                        setTimeout(() => nextRound(), 1000);
+                    }
+                }, 1000);
+            }
+
+            function clearTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+
+            function onWindowResize() {
+                const width = container.clientWidth || 800;
+                const height = container.clientHeight || 600;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }
+
+            function lightenColor(hex, intensity) {
+                const r = (hex >> 16) & 0xff;
+                const g = (hex >> 8) & 0xff;
+                const b = hex & 0xff;
+                const mix = (channel) => Math.round(channel + (255 - channel) * intensity);
+                return (mix(r) << 16) | (mix(g) << 8) | mix(b);
+            }
+        }
+    </script>
+</body>
+</html>

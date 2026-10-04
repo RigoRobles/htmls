@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Teacher Rigo Grammar Arcade</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #17153B, #2E236C, #43358C);
+            --panel-bg: rgba(22, 22, 43, 0.8);
+            --accent: #FFCC00;
+            --accent-strong: #FF9900;
+            --text-primary: #F5F5F7;
+            --text-secondary: #C2C6FF;
+            --button-bg: rgba(255, 255, 255, 0.12);
+            --button-hover: rgba(255, 204, 0, 0.2);
+            --success: #74F0ED;
+            --danger: #FF6B6B;
+            --card-back: #6A5ACD;
+            --card-front: #2E236C;
+            font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            scroll-behavior: smooth;
+        }
+
+        body.lock-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        body.lock-scroll:after {
+            content: "Drag mode on";
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(255, 204, 0, 0.95);
+            color: #1B1035;
+            padding: 0.6rem 1rem;
+            border-radius: 999px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 999;
+        }
+
+        .app {
+            width: min(1100px, 100vw);
+            padding: clamp(1rem, 2vw, 2rem);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        header.top-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(23, 21, 59, 0.95);
+            backdrop-filter: blur(6px);
+            border-radius: 24px;
+            padding: clamp(1rem, 2vw, 1.5rem);
+            box-shadow: 0 20px 40px rgba(9, 9, 24, 0.6);
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #pacmanCanvas canvas {
+            display: block;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+            letter-spacing: 0.04em;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+        .pacman-score {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.6rem 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+
+        .pacman-icon:before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 6px solid var(--accent);
+            border-right-color: transparent;
+            transform: rotate(20deg);
+        }
+
+        .score-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .score-text strong {
+            font-size: 1.2rem;
+            letter-spacing: 0.05em;
+        }
+
+        .score-text span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 999px;
+            background: var(--button-bg);
+            color: var(--text-primary);
+            padding: 0.65rem 1.3rem;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover,
+        button:focus-visible {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #FFC400, #FF9100);
+            color: #1B1035;
+        }
+
+        button.primary:hover,
+        button.primary:focus-visible {
+            background: linear-gradient(135deg, #FFDE59, #FFB347);
+        }
+
+        .intro {
+            background: var(--panel-bg);
+            padding: clamp(1rem, 2vw, 1.5rem);
+            border-radius: 20px;
+            box-shadow: 0 25px 45px rgba(10, 10, 30, 0.55);
+            display: grid;
+            gap: 1rem;
+        }
+
+        .intro.hidden {
+            display: none;
+        }
+
+        .intro p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .intro .name-entry {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            padding: 0.65rem 1rem;
+            border-radius: 12px;
+            border: none;
+            width: 220px;
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+            font-size: 1rem;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        nav.main-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+        }
+
+        nav.main-menu.collapsed {
+            display: none;
+        }
+
+        nav.main-menu.collapsed.open {
+            display: grid;
+        }
+
+        nav.main-menu button {
+            padding: 0.85rem 1.2rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            justify-content: center;
+        }
+
+        nav.main-menu button.active {
+            background: rgba(255, 204, 0, 0.25);
+            box-shadow: 0 12px 30px rgba(255, 204, 0, 0.25);
+            color: var(--accent);
+        }
+
+        .game-panel {
+            display: none;
+            background: var(--panel-bg);
+            border-radius: 22px;
+            padding: clamp(1.2rem, 2.4vw, 2rem);
+            box-shadow: 0 35px 55px rgba(6, 6, 20, 0.6);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .game-panel.active {
+            display: block;
+        }
+
+        .game-panel h2 {
+            margin-top: 0;
+            font-size: clamp(1.4rem, 2.2vw, 2rem);
+            letter-spacing: 0.04em;
+        }
+
+        .hint {
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+            font-size: 0.95rem;
+        }
+
+        .notification {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.info {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .notification.success {
+            background: rgba(116, 240, 237, 0.18);
+            border: 1px solid rgba(116, 240, 237, 0.45);
+        }
+
+        .notification.error {
+            background: rgba(255, 107, 107, 0.18);
+            border: 1px solid rgba(255, 107, 107, 0.4);
+        }
+        .drag-area {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .drag-banks {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .draggable-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .draggable {
+            padding: 0.7rem 1rem;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.2s ease, box-shadow 0.2s, background 0.2s;
+            font-weight: 600;
+        }
+
+        .draggable.dragging {
+            box-shadow: 0 18px 35px rgba(0, 0, 0, 0.4);
+            transform: scale(1.05);
+        }
+
+        .draggable.placed {
+            background: rgba(116, 240, 237, 0.18);
+            border: 1px solid rgba(116, 240, 237, 0.45);
+            cursor: default;
+            touch-action: auto;
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            padding: 1rem;
+            min-height: 110px;
+            display: grid;
+            gap: 0.5rem;
+            background: rgba(13, 11, 31, 0.45);
+            position: relative;
+            /* Added transitions for smooth hover/correct effects */
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .drop-zone.correct {
+            border-color: var(--success);
+            box-shadow: 0 0 25px rgba(116, 240, 237, 0.4);
+        }
+        
+        /* New style for drag-over effect */
+        .drop-zone.drag-over {
+            border-color: var(--accent); /* Highlight border on hover */
+            box-shadow: 0 0 15px var(--accent);
+            transform: translateY(-2px); /* Slight lift */
+        }
+
+        .drop-zone span.label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+        }
+
+        .drop-zone .scenario {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .quiz-options button {
+            justify-content: flex-start;
+            padding: 0.85rem 1rem;
+        }
+
+        .quiz-options button.correct {
+            background: rgba(116, 240, 237, 0.2);
+            border: 1px solid rgba(116, 240, 237, 0.6);
+        }
+
+        .quiz-options button.incorrect {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.6);
+        }
+
+        .quiz-timer {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .memory-card {
+            position: relative;
+            aspect-ratio: 3 / 4;
+            perspective: 1200px;
+            cursor: pointer;
+        }
+
+        .memory-inner {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .memory-card.flipped .memory-inner,
+        .memory-card.matched .memory-inner {
+            transform: rotateY(180deg);
+        }
+
+        .memory-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 18px 35px rgba(5, 5, 20, 0.45);
+        }
+
+        .memory-face.back {
+            background: var(--card-back);
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .memory-face.front {
+            background: var(--card-front);
+            transform: rotateY(180deg);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .memory-card.matched .memory-face.front {
+            border: 2px solid var(--success);
+            box-shadow: 0 0 25px rgba(116, 240, 237, 0.5);
+        }
+
+        .correct-pop {
+            animation: correctPop 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes correctPop {
+            0% {
+                transform: scale(1);
+            }
+            40% {
+                transform: scale(1.18);
+            }
+            80% {
+                transform: scale(0.92);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .top-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .score-display {
+                margin-left: 0;
+            }
+
+            nav.main-menu button {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            nav.main-menu {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                font-size: 15px;
+            }
+
+            header.top-bar {
+                padding: 1rem;
+            }
+
+            .memory-grid {
+                grid-template-columns: repeat(2, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="top-bar">
+            <div class="top-row">
+                <div class="brand">
+                    <div id="pacmanCanvas" aria-hidden="true"></div>
+                    <h1>Teacher Rigo Grammar Arcade</h1>
+                </div>
+                <div class="score-display">
+                    <div class="pacman-score">
+                        <div class="pacman-icon" aria-hidden="true"></div>
+                        <div class="score-text">
+                            <strong id="playerLabel">Player: Teacher Rigo</strong>
+                            <span>Total Score: <span id="score">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="scrollToggle" class="primary" aria-pressed="false">Enable Drag Mode</button>
+                <button id="showMenu">Menu</button>
+            </div>
+            <nav class="main-menu" id="mainMenu">
+                <button data-target="discourse-game" class="active">Discourse Marker Drop</button>
+                <button data-target="linking-quiz">Linking Word Lightning</button>
+                <button data-target="participle-memory">Participle Memory Match</button>
+            </nav>
+        </header>
+
+        <section class="intro" id="intro">
+            <p>Welcome, language adventurer! This arcade is specially powered by <strong>Teacher Rigo</strong>'s grammar wizardry. Pop in your name, smash the start button, and let's collect knowledge pellets.</p>
+            <div class="name-entry">
+                <label for="playerName">Enter your name:</label>
+                <input id="playerName" type="text" value="Teacher Rigo" autocomplete="name" placeholder="Your legendary alias">
+                <button id="startBtn" class="primary">Start the Arcade</button>
+            </div>
+            <p class="hint">Tip: Toggle <strong>Drag Mode</strong> when playing the drag &amp; drop game on phones to stop accidental scrolling.</p>
+        </section>
+
+        <section id="discourse-game" class="game-panel active" aria-labelledby="discourse-title">
+            <h2 id="discourse-title">Discourse Marker Drop</h2>
+            <p class="hint">Drag each discourse marker to the Teacher Rigo scenario where it fits best. These examples are extra silly on purpose--just like Teacher Rigo's lesson warm-ups.</p>
+            <div class="drag-area">
+                <div class="draggable-list" id="markerBank"></div>
+                <div class="drag-banks" id="dropZones"></div>
+            </div>
+            <div class="notification" id="dragNotice"></div>
+        </section>
+
+        <section id="linking-quiz" class="game-panel" aria-labelledby="quiz-title">
+            <h2 id="quiz-title">Linking Word Lightning Round</h2>
+            <p class="hint">You have 40 seconds to wow Teacher Rigo. Pick the linking word that makes the sentence sparkle.</p>
+            <div class="quiz-card">
+                <div class="quiz-info">
+                    <span class="quiz-timer">Time Left: <span id="timer">40</span>s</span>
+                    <span id="quizProgress">Question 1 of 5</span>
+                </div>
+                <p id="quizQuestion"></p>
+                <div class="quiz-options" id="quizOptions"></div>
+                <div class="notification" id="quizNotice"></div>
+                <button id="restartQuiz">Restart Quiz</button>
+            </div>
+        </section>
+
+        <section id="participle-memory" class="game-panel" aria-labelledby="memory-title">
+            <h2 id="memory-title">Participle Clause Memory Match</h2>
+            <p class="hint">Flip the cards to pair the participle clause with its definition. Teacher Rigo swears these sentences came from very serious grammar scientists.</p>
+            <div class="memory-grid" id="memoryGrid"></div>
+            <div class="notification" id="memoryNotice"></div>
+            <div class="controls">
+                <button id="restartMemory">Shuffle Cards</button>
+            </div>
+        </section>
+
+        <footer>
+            Powered by p5.js animations and Teacher Rigo's playful grammar magic.
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script>
+        (() => {
+            'use strict';
+
+            const state = {
+                score: 0,
+                playerName: 'Teacher Rigo',
+                dragBonusAwarded: false,
+                quizTimer: null,
+                timeLeft: 40,
+                quizIndex: 0,
+                memoryMatches: 0,
+                memoryBonusAwarded: false
+            };
+
+            const scoreEl = document.getElementById('score');
+            const playerLabel = document.getElementById('playerLabel');
+            const introSection = document.getElementById('intro');
+            const playerNameInput = document.getElementById('playerName');
+            const startBtn = document.getElementById('startBtn');
+
+            const dragNotice = document.getElementById('dragNotice');
+            const markerBank = document.getElementById('markerBank');
+            const dropZones = document.getElementById('dropZones');
+
+            const quizQuestion = document.getElementById('quizQuestion');
+            const quizOptions = document.getElementById('quizOptions');
+            const quizNotice = document.getElementById('quizNotice');
+            const quizProgress = document.getElementById('quizProgress');
+            const timerEl = document.getElementById('timer');
+            const restartQuizBtn = document.getElementById('restartQuiz');
+
+            const memoryGrid = document.getElementById('memoryGrid');
+            const memoryNotice = document.getElementById('memoryNotice');
+            const restartMemoryBtn = document.getElementById('restartMemory');
+
+            const scrollToggleBtn = document.getElementById('scrollToggle');
+            const showMenuBtn = document.getElementById('showMenu');
+            const mainMenu = document.getElementById('mainMenu');
+            const menuButtons = mainMenu.querySelectorAll('button');
+            const panels = document.querySelectorAll('.game-panel');
+
+            const discourseDeck = [
+                {
+                    marker: 'however',
+                    label: 'Contrast Crisis',
+                    sentence: 'Teacher Rigo attempted a very serious grammar lecture; ____ , his socks kept shouting "PARTICIPLE PARTY" in neon lights.'
+                },
+                {
+                    marker: 'therefore',
+                    label: 'Logical Leap',
+                    sentence: 'Everyone identified the participle clauses correctly; ____ , Teacher Rigo announced an emergency dance break.'
+                },
+                {
+                    marker: 'meanwhile',
+                    label: 'Parallel Pandemonium',
+                    sentence: '____ , Teacher Rigo\'s hamster proctor was scribbling feedback on mini whiteboards.'
+                },
+                {
+                    marker: 'nevertheless',
+                    label: 'Determined Drama',
+                    sentence: 'The projector exploded into glittery confetti; ____ , Teacher Rigo calmly continued explaining discourse markers.'
+                }
+            ];
+
+            const quizDeck = [
+                {
+                    question: 'Teacher Rigo filmed a grammar TikTok; ____ , half the school practised subjunctive dance moves.',
+                    options: ['therefore', 'meanwhile', 'because', 'although'],
+                    answer: 'meanwhile',
+                    explanation: '"Meanwhile" links two events happening at the same time with peak drama.'
+                },
+                {
+                    question: 'The students begged for another meme analysis; ____ , Teacher Rigo opened a fresh slideshow of discourse dragons.',
+                    options: ['however', 'as a result', 'unless', 'in contrast'],
+                    answer: 'as a result',
+                    explanation: '"As a result" shows the consequence of the begging (and the dragons).'
+                },
+                {
+                    question: '____ Teacher Rigo forgets the attendance sheet, he simply writes "everyone fabulous" and keeps teaching.',
+                    options: ['Whenever', 'Despite', 'Whereas', 'Because'],
+                    answer: 'Whenever',
+                    explanation: '"Whenever" introduces a repeated situation that always ends in fabulousness.'
+                },
+                {
+                    question: 'Teacher Rigo brought thirty highlighters; ____ he accidentally bedazzled his own beard.',
+                    options: ['furthermore', 'so', 'although', 'unless'],
+                    answer: 'so',
+                    explanation: '"So" links the cause (too many highlighters) with the sparkly effect.'
+                },
+                {
+                    question: 'The lights went out, ____ the class continued reciting participle clauses by flashlight.',
+                    options: ['yet', 'because', 'instead', 'therefore'],
+                    answer: 'yet',
+                    explanation: '"Yet" contrasts the blackout with the unstoppable grammar chanting.'
+                }
+            ];
+            const memoryDeck = [
+                {
+                    id: 'bananaSuit',
+                    clause: 'Wearing a banana suit, Teacher Rigo demonstrated participle clauses with suspicious dignity.',
+                    definition: 'An -ing clause adds detail about the subject (yes, the banana suit) while the main action happens.'
+                },
+                {
+                    id: 'hoverDrone',
+                    clause: 'Hovering above the class, Teacher Rigo\'s grammar drone zapped anyone who said "wented".',
+                    definition: 'A present participle clause describing the noun (the drone) doing something at the same time as the main verb.'
+                },
+                {
+                    id: 'poweredCoffee',
+                    clause: 'Fueled by triple espresso, Teacher Rigo graded essays faster than a speeding conjunction.',
+                    definition: 'A past participle clause giving the reason or background for the teacher\'s heroic speed.'
+                },
+                {
+                    id: 'sneezingChalk',
+                    clause: 'Sneezed into a chalk cloud, Teacher Rigo still explained gerunds flawlessly.',
+                    definition: 'A past participle clause showing a surprising condition that doesn\'t stop the main action.'
+                }
+            ];
+
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            const storedName = localStorage.getItem('grammarArcadePlayer');
+            if (storedName) {
+                state.playerName = storedName;
+                playerNameInput.value = storedName;
+                playerLabel.textContent = `Player: ${storedName}`;
+            }
+
+            // Function to activate a game panel and its corresponding menu button
+            function activateGamePanel(targetId) {
+                panels.forEach(panel => panel.classList.remove('active'));
+                const targetPanel = document.getElementById(targetId);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                    if (targetId === 'discourse-game') {
+                        buildDragGame();
+                        showMessage(dragNotice, `${state.playerName}, Teacher Rigo just unlocked the discourse dojo for you!`, 'info');
+                    } else if (targetId === 'linking-quiz') {
+                        resetQuiz(true); // Start quiz timer when activated
+                    } else if (targetId === 'participle-memory') {
+                        buildMemoryGame();
+                    }
+                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                menuButtons.forEach(btn => btn.classList.remove('active'));
+                const activeButton = document.querySelector(`[data-target="${targetId}"]`);
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                }
+            }
+
+
+            startBtn.addEventListener('click', () => {
+                const entered = playerNameInput.value.trim();
+                state.playerName = entered || 'Mystery Grammarian';
+                playerLabel.textContent = `Player: ${state.playerName}`;
+                state.score = 0;
+                scoreEl.textContent = state.score;
+                localStorage.setItem('grammarArcadePlayer', state.playerName);
+                introSection.classList.add('hidden');
+                
+                // Activate the first game panel (Discourse Marker Drop) after start
+                activateGamePanel('discourse-game');
+            });
+
+            menuButtons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.target;
+                    activateGamePanel(target); // Use the new function to handle activation
+                    
+                    if (window.innerWidth <= 640) {
+                        mainMenu.classList.remove('open');
+                        showMenuBtn.textContent = 'Menu'; // Reset menu button text
+                    }
+                });
+            });
+
+            function adjustMenuForViewport() {
+                if (window.innerWidth <= 640) {
+                    mainMenu.classList.add('collapsed');
+                } else {
+                    mainMenu.classList.remove('collapsed');
+                    mainMenu.classList.remove('open');
+                    showMenuBtn.textContent = 'Menu';
+                }
+            }
+
+            adjustMenuForViewport();
+            window.addEventListener('resize', adjustMenuForViewport);
+
+            showMenuBtn.addEventListener('click', () => {
+                if (!mainMenu.classList.contains('collapsed')) {
+                    const activePanel = document.querySelector('.game-panel.active');
+                    if (activePanel) {
+                        activePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    return;
+                }
+                mainMenu.classList.toggle('open');
+                showMenuBtn.textContent = mainMenu.classList.contains('open') ? 'Close Menu' : 'Menu';
+            });
+
+            let scrollLocked = false;
+            let storedScroll = 0;
+
+            function toggleScrollLock() {
+                scrollLocked = !scrollLocked;
+                if (scrollLocked) {
+                    storedScroll = window.scrollY || document.documentElement.scrollTop || 0;
+                    document.body.style.top = `-${storedScroll}px`;
+                    document.body.classList.add('lock-scroll');
+                    scrollToggleBtn.textContent = 'Disable Drag Mode';
+                    showMessage(dragNotice, `${state.playerName}, drag mode engaged! Scroll is frozen like Teacher Rigo's leftover tacos.`, 'info', 2500);
+                } else {
+                    document.body.classList.remove('lock-scroll');
+                    document.body.style.top = '';
+                    window.scrollTo(0, storedScroll);
+                    scrollToggleBtn.textContent = 'Enable Drag Mode';
+                }
+                scrollToggleBtn.setAttribute('aria-pressed', String(scrollLocked));
+            }
+
+            scrollToggleBtn.addEventListener('click', toggleScrollLock);
+
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i -= 1) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            function updateScore(points) {
+                if (!points) {
+                    return;
+                }
+                state.score += points;
+                scoreEl.textContent = state.score;
+                animateSuccess(scoreEl.closest('.pacman-score'));
+            }
+
+            function animateSuccess(element) {
+                if (!element || prefersReducedMotion) {
+                    return;
+                }
+                element.classList.remove('correct-pop');
+                void element.offsetWidth;
+                element.classList.add('correct-pop');
+                window.setTimeout(() => {
+                    element.classList.remove('correct-pop');
+                }, 600);
+            }
+
+            function showMessage(box, message, type = 'info', duration = 4000) {
+                if (!box) {
+                    return;
+                }
+                box.textContent = message;
+                box.classList.remove('success', 'error', 'info');
+                box.classList.add('show', type);
+                clearTimeout(box._timeoutId);
+                box._timeoutId = window.setTimeout(() => {
+                    box.classList.remove('show', type);
+                }, duration);
+            }
+            let currentDrag = null;
+            let pointerId = null;
+            let offsetX = 0;
+            let offsetY = 0;
+            let originParent = null;
+            let originNextSibling = null;
+            let hoveredDropZone = null; // New variable to track the currently hovered drop zone
+
+            function buildDragGame() {
+                // Check if the game is already built and reset only if necessary
+                if (markerBank.children.length > 0 || dropZones.children.length > 0) {
+                    // It seems the game was already built, reset it for a fresh start
+                    markerBank.innerHTML = '';
+                    dropZones.innerHTML = '';
+                }
+                state.dragBonusAwarded = false;
+                
+                const markerOrder = shuffle(discourseDeck.map((item) => item.marker));
+                markerOrder.forEach((markerName) => {
+                    const drag = document.createElement('div');
+                    drag.className = 'draggable';
+                    drag.textContent = markerName;
+                    drag.dataset.marker = markerName;
+                    markerBank.appendChild(drag);
+                    drag.addEventListener('pointerdown', startDrag);
+                });
+
+                discourseDeck.forEach((data) => {
+                    const zone = document.createElement('div');
+                    zone.className = 'drop-zone';
+                    zone.dataset.accept = data.marker;
+                    zone.dataset.template = data.sentence;
+                    zone.dataset.filled = 'false'; // Initialize filled state
+
+                    const label = document.createElement('span');
+                    label.className = 'label';
+                    label.textContent = data.label;
+
+                    const prompt = document.createElement('p');
+                    prompt.className = 'scenario';
+                    prompt.dataset.role = 'prompt';
+                    prompt.textContent = data.sentence;
+
+                    zone.appendChild(label);
+                    zone.appendChild(prompt);
+                    dropZones.appendChild(zone);
+                });
+            }
+
+            function startDrag(event) {
+                const target = event.currentTarget;
+                if (target.classList.contains('placed')) {
+                    return;
+                }
+                currentDrag = target;
+                pointerId = event.pointerId;
+                originParent = target.parentElement;
+                originNextSibling = target.nextElementSibling;
+                const rect = target.getBoundingClientRect();
+                offsetX = event.clientX - rect.left;
+                offsetY = event.clientY - rect.top;
+                
+                // Set width/height before positioning to maintain their original dimensions
+                target.style.width = `${rect.width}px`; 
+                target.style.height = `${rect.height}px`; 
+                
+                target.style.position = 'fixed';
+                target.style.left = `${rect.left}px`;
+                target.style.top = `${rect.top}px`;
+                target.style.zIndex = '1000';
+                target.classList.add('dragging');
+                target.setPointerCapture(pointerId);
+                
+                // Add a class to body to indicate drag mode is active, useful for styling/scroll lock
+                document.body.classList.add('is-dragging'); 
+            }
+
+            function onDragMove(event) {
+                if (!currentDrag || event.pointerId !== pointerId) {
+                    return;
+                }
+                // Update position
+                currentDrag.style.left = `${event.clientX - offsetX}px`;
+                currentDrag.style.top = `${event.clientY - offsetY}px`;
+
+                // --- Visual feedback for drop zones ---
+                // Temporarily hide the dragging element to find the element underneath
+                currentDrag.style.display = 'none';
+                const elementUnder = document.elementFromPoint(event.clientX, event.clientY);
+                currentDrag.style.display = ''; // Show it again
+
+                const potentialDropZone = elementUnder ? elementUnder.closest('.drop-zone') : null;
+
+                // Remove drag-over from the old hovered zone if we've moved off it
+                if (hoveredDropZone && hoveredDropZone !== potentialDropZone) {
+                    hoveredDropZone.classList.remove('drag-over');
+                    hoveredDropZone = null;
+                }
+
+                // If a new valid drop zone is hovered, add drag-over
+                if (potentialDropZone && potentialDropZone.dataset.accept === currentDrag.dataset.marker && potentialDropZone.dataset.filled !== 'true') {
+                    if (hoveredDropZone !== potentialDropZone) { // Only update if it's a new zone
+                        potentialDropZone.classList.add('drag-over');
+                        hoveredDropZone = potentialDropZone;
+                    }
+                } else if (hoveredDropZone) { // If nothing valid is under, and we were hovering something
+                    hoveredDropZone.classList.remove('drag-over');
+                    hoveredDropZone = null;
+                }
+                // --- End visual feedback ---
+            }
+
+            function onDragEnd(event) {
+                if (!currentDrag || event.pointerId !== pointerId) {
+                    return;
+                }
+                const dropPoint = { x: event.clientX, y: event.clientY };
+                
+                try {
+                    currentDrag.releasePointerCapture(pointerId);
+                } catch (err) {
+                    // ignore release errors - sometimes pointer capture is lost
+                }
+                
+                // Clean up drag-over class from any hovered drop zone
+                if (hoveredDropZone) {
+                    hoveredDropZone.classList.remove('drag-over');
+                    hoveredDropZone = null;
+                }
+
+                document.body.classList.remove('is-dragging'); // Remove drag mode indicator
+
+                window.requestAnimationFrame(() => finishDrag(dropPoint));
+            }
+
+            function finishDrag(point) {
+                if (!currentDrag) {
+                    return;
+                }
+
+                // Temporarily hide the dragging element to find the element underneath
+                currentDrag.style.display = 'none';
+                const elementUnder = document.elementFromPoint(point.x, point.y);
+                currentDrag.style.display = ''; // Show it again
+
+                const dropTarget = elementUnder ? elementUnder.closest('.drop-zone') : null;
+
+                if (dropTarget && dropTarget.dataset.accept === currentDrag.dataset.marker && dropTarget.dataset.filled !== 'true') {
+                    settleMarker(dropTarget);
+                } else {
+                    resetDrag();
+                    showMessage(dragNotice, `${state.playerName}, that marker belongs elsewhere. Teacher Rigo twirls his moustache thoughtfully.`, 'error');
+                }
+            }
+
+            function settleMarker(zone) {
+                zone.dataset.filled = 'true';
+                const prompt = zone.querySelector('[data-role="prompt"]');
+                if (prompt) {
+                    // Make the inserted marker bold
+                    const completed = zone.dataset.template.replace('____', `<b>${currentDrag.dataset.marker.toUpperCase()}</b>`);
+                    prompt.innerHTML = completed; // Use innerHTML to render the bold tag
+                }
+                currentDrag.classList.remove('dragging');
+                currentDrag.classList.add('placed');
+                currentDrag.style.position = '';
+                currentDrag.style.left = '';
+                currentDrag.style.top = '';
+                currentDrag.style.width = ''; // Clear width
+                currentDrag.style.height = ''; // Clear height
+                currentDrag.style.zIndex = '';
+                currentDrag.removeEventListener('pointerdown', startDrag); // Prevent further dragging of placed item
+                zone.appendChild(currentDrag);
+                zone.classList.add('correct');
+                animateSuccess(zone);
+                if (!currentDrag.dataset.scored) {
+                    updateScore(15);
+                    currentDrag.dataset.scored = 'true';
+                }
+                showMessage(dragNotice, `"${currentDrag.dataset.marker.toUpperCase()}" lands perfectly! Teacher Rigo high-fives ${state.playerName}.`, 'success');
+                checkDragCompletion();
+                currentDrag = null;
+                pointerId = null;
+            }
+
+            function resetDrag() {
+                if (!currentDrag) {
+                    return;
+                }
+                currentDrag.classList.remove('dragging');
+                currentDrag.style.position = '';
+                currentDrag.style.left = '';
+                currentDrag.style.top = '';
+                currentDrag.style.width = ''; // Clear width
+                currentDrag.style.height = ''; // Clear height
+                currentDrag.style.zIndex = '';
+                if (originParent) {
+                    if (originNextSibling && originNextSibling.parentElement === originParent) {
+                        originParent.insertBefore(currentDrag, originNextSibling);
+                    } else {
+                        originParent.appendChild(currentDrag);
+                    }
+                } else {
+                    markerBank.appendChild(currentDrag);
+                }
+                currentDrag = null;
+                pointerId = null;
+            }
+
+            function cancelDrag() {
+                if (currentDrag) {
+                    // Ensure hover state is cleaned if drag is cancelled
+                    if (hoveredDropZone) {
+                        hoveredDropZone.classList.remove('drag-over');
+                        hoveredDropZone = null;
+                    }
+                    document.body.classList.remove('is-dragging');
+                    resetDrag();
+                }
+            }
+
+            function checkDragCompletion() {
+                const zones = Array.from(dropZones.querySelectorAll('.drop-zone'));
+                const allPlaced = zones.every((zone) => zone.dataset.filled === 'true');
+                if (allPlaced && !state.dragBonusAwarded) {
+                    state.dragBonusAwarded = true;
+                    updateScore(25);
+                    showMessage(dragNotice, `${state.playerName}, you conquered the discourse markers! Teacher Rigo unlocks a bonus combo.`, 'success', 6000);
+                }
+            }
+
+            window.addEventListener('pointermove', onDragMove);
+            window.addEventListener('pointerup', onDragEnd);
+            window.addEventListener('pointercancel', cancelDrag);
+
+            function renderQuestion() {
+                const question = quizDeck[state.quizIndex];
+                if (!question) { // Handle case where quiz might be completed
+                    finishQuiz('complete');
+                    return;
+                }
+                quizProgress.textContent = `Question ${state.quizIndex + 1} of ${quizDeck.length}`;
+                quizQuestion.textContent = question.question;
+                quizOptions.dataset.locked = '';
+                quizOptions.innerHTML = '';
+                shuffle([...question.options]).forEach((option) => {
+                    const btn = document.createElement('button');
+                    btn.textContent = option;
+                    btn.dataset.option = option;
+                    btn.addEventListener('click', () => evaluateOption(btn, option, question));
+                    quizOptions.appendChild(btn);
+                });
+            }
+
+            function evaluateOption(button, option, question) {
+                if (quizOptions.dataset.locked === 'locked') {
+                    return;
+                }
+                quizOptions.dataset.locked = 'locked';
+                const isCorrect = option === question.answer;
+                if (isCorrect) {
+                    button.classList.add('correct');
+                    animateSuccess(button);
+                    updateScore(10);
+                    showMessage(quizNotice, `Correct! ${state.playerName}, ${question.explanation} Teacher Rigo confers +10 points.`, 'success');
+                } else {
+                    button.classList.add('incorrect');
+                    const correctBtn = Array.from(quizOptions.children).find((child) => child.dataset.option === question.answer);
+                    if (correctBtn) {
+                        correctBtn.classList.add('correct');
+                    }
+                    showMessage(quizNotice, `Not quite. ${question.explanation}`, 'error');
+                }
+                Array.from(quizOptions.children).forEach((btn) => {
+                    btn.disabled = true;
+                });
+                window.setTimeout(() => {
+                    state.quizIndex += 1;
+                    if (state.quizIndex >= quizDeck.length) {
+                        finishQuiz('complete');
+                    } else {
+                        Array.from(quizOptions.children).forEach((btn) => {
+                            btn.classList.remove('correct', 'incorrect');
+                            btn.disabled = false;
+                        });
+                        quizOptions.dataset.locked = '';
+                        renderQuestion();
+                    }
+                }, 1200);
+            }
+
+            function finishQuiz(reason) {
+                clearInterval(state.quizTimer);
+                state.quizTimer = null;
+                timerEl.textContent = Math.max(state.timeLeft, 0);
+                Array.from(quizOptions.children).forEach((btn) => {
+                    btn.disabled = true;
+                });
+                if (reason === 'complete') {
+                    if (state.timeLeft > 0) {
+                        const bonus = Math.max(10, Math.floor(state.timeLeft / 5) * 3);
+                        updateScore(bonus);
+                        showMessage(quizNotice, `Lightning round complete with ${state.timeLeft}s to spare! Bonus ${bonus} points shower down from Teacher Rigo's glitter cannon.`, 'success', 6000);
+                    } else {
+                        showMessage(quizNotice, 'Lightning round complete! No time left, but Teacher Rigo still applauds your linking skills.', 'success', 5000);
+                    }
+                } else { // 'time' reason
+                    showMessage(quizNotice, `Time! Teacher Rigo dramatically falls onto a beanbag. Restart and try again, ${state.playerName}!`, 'error', 6000);
+                }
+            }
+
+            function startQuizTimer() {
+                if (state.quizTimer) {
+                    clearInterval(state.quizTimer);
+                }
+                state.quizTimer = window.setInterval(() => {
+                    state.timeLeft -= 1;
+                    timerEl.textContent = Math.max(state.timeLeft, 0);
+                    if (state.timeLeft <= 0) {
+                        finishQuiz('time');
+                    }
+                }, 1000);
+            }
+
+            function resetQuiz(startTimer = false) {
+                state.quizIndex = 0;
+                state.timeLeft = 40;
+                timerEl.textContent = state.timeLeft;
+                renderQuestion();
+                if (state.quizTimer) {
+                    clearInterval(state.quizTimer);
+                    state.quizTimer = null;
+                }
+                Array.from(quizOptions.children).forEach((btn) => { // Re-enable buttons if they were disabled
+                    btn.disabled = false;
+                    btn.classList.remove('correct', 'incorrect'); // Clear previous styling
+                });
+                quizOptions.dataset.locked = ''; // Unlock options for new question
+                if (startTimer) {
+                    startQuizTimer();
+                    showMessage(quizNotice, `Fresh timer! Beat the buzzer, ${state.playerName}.`, 'info');
+                } else {
+                     // If not starting timer, clear any existing messages
+                    showMessage(quizNotice, '', 'info', 1);
+                }
+            }
+
+            restartQuizBtn.addEventListener('click', () => {
+                resetQuiz(true);
+            });
+
+            let flippedCards = [];
+            let memoryLock = false;
+
+            function buildMemoryGame() {
+                // Reset game state
+                state.memoryMatches = 0;
+                state.memoryBonusAwarded = false;
+                flippedCards = [];
+                memoryLock = false;
+                memoryGrid.innerHTML = ''; // Clear previous cards
+
+                const cards = shuffle(memoryDeck.flatMap((pair) => ([
+                    { type: 'clause', id: pair.id, text: pair.clause },
+                    { type: 'definition', id: pair.id, text: pair.definition }
+                ])));
+
+                cards.forEach((item) => {
+                    const card = document.createElement('div');
+                    card.className = 'memory-card';
+                    card.dataset.match = item.id;
+                    card.dataset.type = item.type;
+
+                    const inner = document.createElement('div');
+                    inner.className = 'memory-inner';
+
+                    const back = document.createElement('div');
+                    back.className = 'memory-face back';
+                    back.textContent = item.type === 'clause' ? 'Clause?' : 'Definition?';
+
+                    const front = document.createElement('div');
+                    front.className = 'memory-face front';
+                    front.textContent = item.text;
+
+                    inner.appendChild(back);
+                    inner.appendChild(front);
+                    card.appendChild(inner);
+                    memoryGrid.appendChild(card);
+                    card.addEventListener('click', onCardClick);
+                });
+            }
+
+            function onCardClick(event) {
+                const card = event.currentTarget;
+                if (memoryLock || card.classList.contains('matched') || card.classList.contains('flipped')) {
+                    return;
+                }
+                card.classList.add('flipped');
+                flippedCards.push(card);
+                if (flippedCards.length === 2) {
+                    checkPair();
+                }
+            }
+
+            function checkPair() {
+                const [first, second] = flippedCards;
+                if (!first || !second) {
+                    return;
+                }
+                if (first === second) { // clicked same card twice
+                    flippedCards = [first];
+                    return;
+                }
+                const isMatch = first.dataset.match === second.dataset.match && first.dataset.type !== second.dataset.type;
+                if (isMatch) {
+                    first.classList.add('matched');
+                    second.classList.add('matched');
+                    animateSuccess(first);
+                    animateSuccess(second);
+                    if (!first.dataset.scored && !second.dataset.scored) { // Ensure score is awarded only once per match
+                        updateScore(12);
+                        first.dataset.scored = 'true';
+                        second.dataset.scored = 'true';
+                    }
+                    state.memoryMatches += 1;
+                    showMessage(memoryNotice, `Match! ${state.playerName}, Teacher Rigo salutes your clause powers.`, 'success');
+                    flippedCards = [];
+                    checkMemoryCompletion();
+                } else {
+                    memoryLock = true;
+                    showMessage(memoryNotice, 'Nope! Pair the clause with its bestie definition, whispers Teacher Rigo.', 'error');
+                    window.setTimeout(() => {
+                        first.classList.remove('flipped');
+                        second.classList.remove('flipped');
+                        flippedCards = [];
+                        memoryLock = false;
+                    }, 900);
+                }
+            }
+
+            function checkMemoryCompletion() {
+                if (state.memoryMatches === memoryDeck.length && !state.memoryBonusAwarded) {
+                    state.memoryBonusAwarded = true;
+                    updateScore(30);
+                    showMessage(memoryNotice, 'All participle pairs matched! Teacher Rigo showers you with bonus confetti.', 'success', 6000);
+                }
+            }
+
+            restartMemoryBtn.addEventListener('click', () => {
+                buildMemoryGame();
+                showMessage(memoryNotice, 'Shuffled! Teacher Rigo rearranged the deck while humming the grammar anthem.', 'info');
+            });
+
+            // Initial call to set up the first active game panel and its menu button state
+            // and ensure all game states are clear
+            menuButtons.forEach(btn => btn.classList.remove('active')); // Clear all active states initially
+            document.querySelector('[data-target="discourse-game"]').classList.add('active'); // Set first button active
+            
+            // Ensure initial games are built/reset when the page loads IF the intro is hidden
+            // Otherwise, they'll be built when 'Start Arcade' is clicked.
+            if (introSection.classList.contains('hidden')) {
+                activateGamePanel('discourse-game'); // If intro is already hidden (e.g., from refresh), activate default game
+            } else {
+                // If intro is visible, just ensure the first game state is ready, but don't show it yet
+                buildDragGame();
+                resetQuiz(false); // Build quiz but don't start timer until game is active
+                buildMemoryGame();
+            }
+
+
+            new p5((p) => {
+                let pacX = -30;
+                let mouthAngle = 0;
+                let mouthOpening = true;
+                const pellets = [];
+
+                p.setup = () => {
+                    const canvas = p.createCanvas(150, 60);
+                    canvas.parent('pacmanCanvas');
+                    p.noStroke();
+                    p.frameRate(60);
+                    for (let i = 0; i < 6; i += 1) {
+                        pellets.push({ x: 40 + (i * 18), eaten: false });
+                    }
+                };
+
+                p.draw = () => {
+                    p.clear();
+                    const pacY = p.height / 2;
+                    p.fill(255, 204, 0);
+                    if (mouthOpening) {
+                        mouthAngle = Math.min(mouthAngle + 0.08, 0.6);
+                        if (mouthAngle >= 0.6) {
+                            mouthOpening = false;
+                        }
+                    } else {
+                        mouthAngle = Math.max(mouthAngle - 0.08, 0);
+                        if (mouthAngle <= 0) {
+                            mouthOpening = true;
+                        }
+                    }
+                    p.push();
+                    p.translate(pacX, pacY);
+                    p.arc(0, 0, 40, 40, mouthAngle, p.TWO_PI - mouthAngle, p.PIE);
+                    p.pop();
+
+                    pellets.forEach((pellet) => {
+                        if (!pellet.eaten && pacX > pellet.x - 12) {
+                            pellet.eaten = true;
+                        }
+                        if (!pellet.eaten) {
+                            p.fill(148, 163, 255);
+                            p.circle(pellet.x, pacY, 6);
+                        }
+                    });
+
+                    pacX += 1.3;
+                    if (pacX > p.width + 20) {
+                        pacX = -25;
+                        pellets.forEach((pellet, index) => {
+                            pellet.x = 40 + (index * 18);
+                            pellet.eaten = false;
+                        });
+                    }
+
+                    p.fill(116, 240, 237);
+                    p.textSize(12);
+                    p.textAlign(p.LEFT, p.CENTER);
+                    p.text(`Score x ${state.score}`, 60, pacY + 18);
+                };
+            });
+        })();
+    </script>
+</body>
+</html>
