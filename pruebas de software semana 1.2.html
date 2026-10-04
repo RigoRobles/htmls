@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>QA Masterclass & Defect Defender — BMO System</title>
+<style>
+  :root {
+    --bg: #07120b;
+    --grid: #1bff6a;
+    --mint: #aaffc4;
+    --gold: #ffe45e;
+    --danger: #ff5b3d;
+    --panel: #7ac8aa;
+    --text: #d9f0ff;
+    --card-bg: #04110b;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: #101614; color: var(--text);
+    font-family: ui-monospace, Consolas, "Courier New", monospace;
+    overflow: hidden;
+  }
+  body { display: grid; place-items: center; }
+  
+  /* ARCADE CABINET SHELL */
+  #shell {
+    position: relative; width: min(100vw, 1100px); height: min(100vh, 760px);
+    background: linear-gradient(145deg, #88d3b2, #4e9c83);
+    border: 10px solid #255e50; border-radius: 28px; padding: 18px;
+    box-shadow: 0 20px 80px #000a, inset 0 0 0 4px #b9ffe0;
+  }
+  #screenWrap {
+    position: relative; width: 100%; height: calc(100% - 94px); overflow: hidden;
+    background: #030806; border: 8px solid #163b30; border-radius: 14px;
+    box-shadow: inset 0 0 30px #000; display: flex; flex-direction: column;
+  }
+  
+  /* CRT EFFECT */
+  #crt {
+    position: absolute; inset: 0; pointer-events: none; z-index: 100;
+    background: repeating-linear-gradient(0deg, transparent 0 3px, #0003 3px 4px),
+                radial-gradient(circle at center, transparent 45%, #0009 120%);
+    mix-blend-mode: multiply;
+  }
+
+  /* TOP BAR */
+  #topbar {
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 10px 16px; background: #001b0d; border-bottom: 2px solid var(--grid);
+    z-index: 10;
+  }
+  .pill {
+    padding: 6px 12px; border: 2px solid var(--grid); background: #001b0ddd;
+    color: var(--mint); font-weight: 800; border-radius: 8px; font-size: 14px;
+  }
+
+  /* NAVIGATION TABS */
+  #nav-tabs {
+    display: flex; overflow-x: auto; padding: 10px; background: #020a06; gap: 8px;
+    border-bottom: 2px solid #163b30; z-index: 10;
+  }
+  #nav-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: #0a1f14; border: 2px solid #173e34; color: var(--mint);
+    padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit;
+    font-weight: bold; white-space: nowrap; transition: 0.2s;
+  }
+  .tab-btn.active { background: var(--grid); color: #000; }
+  .tab-btn.game-tab { background: var(--gold); color: #000; border-color: #a26b00; }
+
+  /* CONTENT AREA (MASTERCLASS & QUIZ) */
+  #content-area {
+    flex: 1; overflow-y: auto; padding: 20px; position: relative; z-index: 5;
+    background: var(--bg); scroll-behavior: smooth;
+  }
+  .phase-content { display: none; animation: fadeIn 0.4s ease; }
+  .phase-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card {
+    background: var(--card-bg); border: 2px solid #173e34;
+    padding: 20px; border-radius: 12px; margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  }
+  h1 { color: var(--gold); font-size: 28px; margin: 0 0 15px; text-shadow: 2px 2px #7b4b00; }
+  h2 { color: var(--mint); font-size: 20px; margin-bottom: 10px; border-bottom: 1px solid #173e34; padding-bottom: 5px; }
+  p, li { line-height: 1.6; margin-bottom: 10px; font-size: 15px; }
+  ul { padding-left: 20px; }
+  .highlight { color: var(--gold); font-weight: bold; }
+  
+  pre {
+    background: #000; border: 1px solid var(--grid); padding: 15px;
+    border-radius: 8px; overflow-x: auto; color: var(--mint);
+  }
+
+  /* QUIZ STYLES */
+  .quiz-option {
+    display: block; width: 100%; text-align: left; background: #0a1f14;
+    border: 2px solid #173e34; color: white; padding: 15px; margin: 10px 0;
+    border-radius: 8px; cursor: pointer; font-family: inherit; transition: 0.2s;
+  }
+  .quiz-option.selected { border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 228, 94, 0.4); background: #1a3324; }
+  .quiz-option.correct { background: var(--grid); color: #000; border-color: #fff; }
+  .quiz-option.wrong { background: var(--danger); color: #fff; border-color: #fff; }
+  #quiz-feedback { margin-top: 15px; font-weight: bold; padding: 10px; border-radius: 8px; display: none; }
+
+  /* GAME STYLES */
+  #game-layer {
+    display: none; position: absolute; inset: 0; z-index: 20; background: #030806;
+  }
+  #game-layer.active { display: block; }
+  canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; touch-action: none; }
+  
+  #game-ui { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.82); z-index: 25; text-align: center; padding: 16px; overflow-y: auto; }
+  #game-ui.hidden { display: none; }
+  #game-ui h1 { margin: 0; }
+  .bmo-tag { color: var(--gold); letter-spacing: 3px; font-size: 13px; font-weight: 800; margin: 0 0 6px; }
+  .game-btn { background: var(--gold); border: none; padding: 12px 24px; font-size: 18px; font-family: inherit; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px #a26b00; margin-top: 20px;}
+  .game-btn:active { transform: translateY(4px); box-shadow: 0 0 #a26b00; }
+
+  /* ARCADE GAME SELECTOR */
+  #game-select { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin: 18px 0 6px; }
+  .game-card {
+    width: 220px; background: #0a1f14; border: 3px solid #173e34; border-radius: 14px;
+    padding: 16px; cursor: pointer; transition: 0.15s; color: var(--text);
+  }
+  .game-card .emoji { font-size: 40px; }
+  .game-card h3 { margin: 6px 0; color: var(--mint); font-size: 17px; }
+  .game-card p { font-size: 12px; line-height: 1.4; margin: 0; color: #bfe8d3; }
+  .game-card.sel { border-color: var(--gold); box-shadow: 0 0 22px rgba(255,228,94,0.45); transform: translateY(-4px); background: #12291b; }
+  .hint { color: var(--mint); font-size: 13px; margin-top: 6px; }
+  body.bmo .game-card { width: 150px; padding: 10px; }
+  body.bmo .game-card .emoji { font-size: 30px; }
+  body.bmo #game-ui h1 { font-size: 26px; }
+
+  /* CONTROLS (Faux Hardware) */
+  #controls { height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 8px 0; }
+  .cluster { display: flex; gap: 8px; align-items: center; }
+  .ctrl {
+    width: 64px; height: 56px; border-radius: 14px; border: 3px solid #173e34;
+    background: #c8ffe6; color: #123b2e; font-size: 24px; box-shadow: 0 5px #235b4c;
+    user-select: none; touch-action: none; font-weight: bold; display: grid; place-items: center; cursor: pointer;
+  }
+  .ctrl.action { border-radius: 50%; width: 58px; height: 58px; background: #ffe45e; color: #5a3a00; }
+  #brand { font-weight: 900; color: #163d32; text-align: center; font-size: 12px; }
+
+  /* BMO NATIVE MODE OVERRIDES */
+  body.bmo #shell { width: 100vw; height: 100vh; border: 0; border-radius: 0; padding: 0; background: none; box-shadow: none; }
+  body.bmo #screenWrap { height: 100%; border: 0; border-radius: 0; }
+  body.bmo #controls, body.bmo #brand { display: none; }
+  body.bmo #topbar { padding: 5px 10px; }
+  body.bmo .pill { padding: 4px 8px; font-size: 11px; border-width: 1px; }
+  body.bmo .tab-btn { padding: 6px 12px; font-size: 12px; }
+  body.bmo h1 { font-size: 22px; }
+  body.bmo h2 { font-size: 16px; }
+  body.bmo p, body.bmo li { font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div id="shell">
+  <div id="screenWrap">
+    <!-- CRT Effect overlay -->
+    <div id="crt"></div>
+    
+    <!-- Top Stats -->
+    <div id="topbar">
+      <div class="pill" id="header-title">SOFTWARE TESTING PRO</div>
+      <div class="pill" id="header-status">LVL: 1/7</div>
+    </div>
+
+    <!-- Navigation -->
+    <div id="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('phase1')">1. Foundations</button>
+      <button class="tab-btn" onclick="switchTab('phase2')">2. Strategy</button>
+      <button class="tab-btn" onclick="switchTab('phase3')">3. Levels</button>
+      <button class="tab-btn" onclick="switchTab('phase4')">4. JUnit</button>
+      <button class="tab-btn" onclick="switchTab('phase5')">5. Career</button>
+      <button class="tab-btn" onclick="switchTab('phase6')">6. Future</button>
+      <button class="tab-btn" onclick="switchTab('quiz')" style="border-color:var(--grid)">Quiz</button>
+      <button class="tab-btn game-tab" onclick="switchTab('game')">🎮 Play</button>
+    </div>
+
+    <!-- Course Content Area -->
+    <div id="content-area">
+      <!-- PHASE 1 -->
+      <div id="phase1" class="phase-content active">
+        <div class="card">
+          <h1>Phase 1: Foundations & Motivations</h1>
+          <h2>Verification vs. Validation</h2>
+          <p>Understanding testing starts with two crucial questions:</p>
+          <ul>
+            <li><span class="highlight">Verification:</span> "Are we building the product right?" (Does the code match the design documents?)</li>
+            <li><span class="highlight">Validation:</span> "Are we building the right product?" (Does this actually solve the user's real-world problem?)</li>
+          </ul>
+          <h2>The Cost of Quality</h2>
+          <p>We test to identify defects early. Why? Because of the <strong>Rule of 10</strong>. A bug found during requirements gathering costs $1 to fix. During coding, $10. After release to the public? <strong>$100+</strong> and your reputation.</p>
+          <h2>Key Definitions</h2>
+          <ul>
+            <li><strong>Error:</strong> A human mistake (e.g., developer misunderstands a rule).</li>
+            <li><strong>Defect (Bug):</strong> The physical flaw injected into the code.</li>
+            <li><strong>Failure:</strong> The system crashing when the user clicks a button.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PHASE 2 -->
+      <div id="phase2" class="phase-content">
+        <div class="card">
+          <h1>Phase 2: Strategy & Requirements</h1>
+          <h2>The Traceability Matrix</h2>
+          <p>How do you know you've tested everything? You use a <strong>Requirements Traceability Matrix (RTM)</strong>. It is a document that maps every single user requirement to a specific Test Case, ensuring 100% coverage.</p>
+          <h2>Anatomy of a Test Case</h2>
+          <p>A professional test case isn't just "try logging in." It includes:</p>
+          <ul>
+            <li><strong>Pre-conditions:</strong> User must have an active account.</li>
+            <li><strong>Test Data:</strong> Username: test@test.com, Pass: 12345.</li>
+            <li><strong>Execution Steps:</strong> 1. Navigate to /login. 2. Enter credentials. 3. Click Submit.</li>
+            <li><strong>Expected Result:</strong> User is redirected to Dashboard.</li>
+            <li><strong>Actual Result:</strong> (Filled during execution).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PHASE 3 -->
+      <div id="phase3" class="phase-content">
+        <div class="card">
+          <h1>Phase 3: Levels and Types of Testing</h1>
+          <h2>The Testing V-Model Levels</h2>
+          <ul>
+            <li><strong>Unit Testing:</strong> Testing a single isolated function (White Box).</li>
+            <li><strong>Integration Testing:</strong> Ensuring Module A talks correctly to Module B.</li>
+            <li><strong>System Testing:</strong> Testing the entire compiled application end-to-end (Black Box).</li>
+            <li><strong>Acceptance Testing (UAT):</strong> The client testing the app to sign off on the release.</li>
+          </ul>
+          <h2>Smoke vs. Sanity Testing</h2>
+          <p><span class="highlight">Smoke Testing:</span> A quick test to see if the main features work (e.g., does the app even start?). If it fails, reject the build.<br>
+          <span class="highlight">Sanity Testing:</span> Deep testing of a specific module after a minor code change to ensure the bug is actually fixed.</p>
+        </div>
+      </div>
+
+      <!-- PHASE 4 -->
+      <div id="phase4" class="phase-content">
+        <div class="card">
+          <h1>Phase 4: Practical JUnit & TDD</h1>
+          <h2>Test Driven Development (TDD)</h2>
+          <p>TDD reverses standard coding. You write the Test <em>first</em>. It will fail (Red). Then you write the minimum code to pass it (Green). Then you clean up the code (Refactor).</p>
+          <h2>Advanced JUnit & Mockito</h2>
+          <p>Sometimes you need to test a function that relies on a database, but the database isn't built yet. We use <strong>Stubs and Mocks</strong> (like the Mockito framework) to create "fake" databases that return fixed answers, allowing us to test our logic in total isolation.</p>
+          <pre>
+@Test
+void testLogin() {
+    // Mocking the database response
+    when(mockDB.getUser("john")).thenReturn(validUser);
+    
+    // Asserting the logic
+    assertTrue(authService.login("john", "pass"));
+}</pre>
+        </div>
+      </div>
+
+      <!-- PHASE 5 -->
+      <div id="phase5" class="phase-content">
+        <div class="card">
+          <h1>Phase 5: Execution & Career Growth</h1>
+          <h2>The CI/CD Pipeline</h2>
+          <p>Modern testers don't click buttons manually all day. They integrate automated tests into <strong>Continuous Integration (CI)</strong> pipelines (like Jenkins or GitHub Actions). Every time a developer saves code, your automated tests run in the cloud instantly.</p>
+          <h2>Writing the Perfect Bug Report</h2>
+          <p>To prevent developers from saying <em>"Works on my machine,"</em> include:</p>
+          <ul>
+            <li>Exact Environment (Chrome 114, Windows 11).</li>
+            <li>Clear "Steps to Reproduce".</li>
+            <li>Screenshots, video recordings, and console logs.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PHASE 6 -->
+      <div id="phase6" class="phase-content">
+        <div class="card">
+          <h1>Phase 6: Future Trends</h1>
+          <h2>Shift-Left & Automation</h2>
+          <p>The industry is moving towards <span class="highlight">Shift-Left</span> testing—testing during the design phase before code is written. For automation, tools like <strong>Selenium</strong>, <strong>Cypress</strong>, and <strong>Playwright</strong> are industry standards for simulating a real user clicking through a web browser.</p>
+          <h2>AI in Testing</h2>
+          <p>Artificial Intelligence is now being used for "Self-healing tests" (if a developer changes a button's ID, the AI finds the new button automatically) and auto-generating test scripts based on analyzing user behavior in production.</p>
+        </div>
+      </div>
+
+      <!-- QUIZ TAB -->
+      <div id="quiz" class="phase-content">
+        <div class="card">
+          <h1 id="q-title">Knowledge Check</h1>
+          <p style="color: var(--mint)">Use Left/Right to select, Action (A) to submit.</p>
+          <div id="quiz-container">
+            <!-- Injected via JS -->
+          </div>
+          <div id="quiz-feedback"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME LAYER (Canvas overlay) -->
+    <div id="game-layer">
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+      <div id="game-ui"><!-- Injected via JS (arcade selector / game over) --></div>
+    </div>
+  </div>
+
+  <!-- HARDWARE CONTROLS SHELL -->
+  <div id="controls">
+    <div class="cluster">
+      <button class="ctrl" data-key="left">◀</button>
+      <button class="ctrl" data-key="up">▲</button>
+      <button class="ctrl" data-key="down">▼</button>
+      <button class="ctrl" data-key="right">▶</button>
+    </div>
+    <div id="brand">BMO-STYLE<br>GAME SYSTEM</div>
+    <div class="cluster">
+      <button class="ctrl action" data-key="action">Ⓐ</button>
+      <button class="ctrl action" style="background:#ff6b56;color:#3b0800" data-key="b">Ⓑ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // Detect BMO Native Mode
+  if (window.self !== window.top || location.search.includes('bmo') || location.hash.includes('bmo')) {
+      document.body.classList.add('bmo');
+  }
+
+  // ==== AUDIO SYSTEM ====
+  let audioCtx = null;
+  function tone(freq = 440, dur = 0.1, type = 'square', vol = 0.05) {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      g.gain.setValueAtTime(vol, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime + dur);
+    } catch(e) {}
+  }
+
+  // ==== INPUT SYSTEM ====
+  const keys = { left: false, right: false, up: false, down: false, action: false, b: false };
+  let lastKeys = { ...keys };
+
+  // Key mapping (also matches BMO's Xbox controller -> keyboard bridge)
+  const keyMap = {
+    ArrowLeft: 'left', KeyA: 'left',
+    ArrowRight: 'right', KeyD: 'right',
+    ArrowUp: 'up', KeyW: 'up',
+    ArrowDown: 'down', KeyS: 'down',
+    Space: 'action', Enter: 'action', KeyZ: 'action', KeyJ: 'action',
+    KeyX: 'b', KeyK: 'b', ShiftLeft: 'b'
+  };
+
+  window.addEventListener('keydown', e => {
+    if (keyMap[e.code]) { keys[keyMap[e.code]] = true; e.preventDefault(); }
+  });
+  window.addEventListener('keyup', e => {
+    if (keyMap[e.code]) { keys[keyMap[e.code]] = false; e.preventDefault(); }
+  });
+
+  // Touch controls
+  document.querySelectorAll('.ctrl').forEach(btn => {
+    const k = btn.dataset.key;
+    const press = e => { e.preventDefault(); keys[k] = true; };
+    const release = e => { e.preventDefault(); keys[k] = false; };
+    btn.addEventListener('pointerdown', press);
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointerleave', release);
+  });
+
+  // Check for distinct button presses (fires once per press)
+  function isJustPressed(key) {
+    return keys[key] && !lastKeys[key];
+  }
+
+  // ==== APP STATE (UI Navigation) ====
+  let activeTab = 'phase1';
+  const tabsList = ['phase1', 'phase2', 'phase3', 'phase4', 'phase5', 'phase6', 'quiz', 'game'];
+
+  window.switchTab = function(tabId) {
+    activeTab = tabId;
+    
+    // UI Updates
+    document.querySelectorAll('.phase-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    if (tabId !== 'game') {
+      document.getElementById(tabId).classList.add('active');
+      document.getElementById('content-area').scrollTop = 0;
+      document.getElementById('game-layer').classList.remove('active');
+      
+      const tabIdx = tabsList.indexOf(tabId);
+      document.querySelectorAll('.tab-btn')[tabIdx].classList.add('active');
+      document.getElementById('header-status').innerText = tabId === 'quiz' ? 'EXAM' : `LVL: ${tabIdx+1}/6`;
+      
+      if(tabId === 'quiz') initQuiz();
+    } else {
+      document.getElementById('game-layer').classList.add('active');
+      document.querySelectorAll('.tab-btn')[7].classList.add('active');
+      document.getElementById('header-status').innerText = 'ARCADE';
+      showGameMenu();
+    }
+    tone(600, 0.05, 'sine');
+  };
+
+  // ==== QUIZ SYSTEM ====
+  const quizData = [
+    { q: "What answers 'Are we building the right product?'", opts: ["Verification", "Validation", "Unit Testing", "Debugging"], ans: 1 },
+    { q: "A flaw injected into the code by a developer is a:", opts: ["Failure", "Error", "Defect (Bug)", "Incident"], ans: 2 },
+    { q: "Testing if the app simply starts without crashing is:", opts: ["Sanity Testing", "Smoke Testing", "Integration Testing", "Acceptance Testing"], ans: 1 },
+    { q: "Writing the Test BEFORE the code is known as:", opts: ["Shift-Right", "TDD", "CI/CD", "Black Box"], ans: 1 },
+    { q: "Testing early in the design phase is called:", opts: ["Shift-Left", "Agile Testing", "Unit Testing", "Load Testing"], ans: 0 }
+  ];
+  let currentQ = 0;
+  let qScore = 0;
+  let selectedOpt = 0;
+  let quizState = 'playing'; // playing, feedback, finished
+
+  function initQuiz() {
+    currentQ = 0; qScore = 0; selectedOpt = 0; quizState = 'playing';
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    if (currentQ >= quizData.length) {
+      showQuizResults();
+      return;
+    }
+    document.getElementById('q-title').innerText = `Question ${currentQ + 1} of ${quizData.length}`;
+    const q = quizData[currentQ];
+    
+    let html = `<h2>${q.q}</h2><div style="display:flex; flex-direction:column; gap:5px;">`;
+    q.opts.forEach((opt, i) => {
+      html += `<div class="quiz-option ${i === selectedOpt ? 'selected' : ''}" id="opt-${i}">${opt}</div>`;
+    });
+    html += `</div>`;
+    
+    document.getElementById('quiz-container').innerHTML = html;
+    document.getElementById('quiz-feedback').style.display = 'none';
+    quizState = 'playing';
+  }
+
+  function handleQuizInput() {
+    if (quizState === 'finished') {
+      if (isJustPressed('action')) initQuiz();
+      return;
+    }
+    if (quizState === 'feedback') {
+      if (isJustPressed('action')) {
+        currentQ++;
+        selectedOpt = 0;
+        renderQuestion();
+        tone(500, 0.05);
+      }
+      return;
+    }
+
+    // Navigation
+    if (isJustPressed('up') || isJustPressed('left')) {
+      selectedOpt = (selectedOpt - 1 + 4) % 4;
+      updateQuizSelection();
+      tone(400, 0.03, 'sine');
+    }
+    if (isJustPressed('right')) { // Down/Right
+      selectedOpt = (selectedOpt + 1) % 4;
+      updateQuizSelection();
+      tone(400, 0.03, 'sine');
+    }
+
+    // Submit
+    if (isJustPressed('action')) {
+      submitAnswer();
+    }
+  }
+
+  function updateQuizSelection() {
+    document.querySelectorAll('.quiz-option').forEach((el, i) => {
+      el.classList.toggle('selected', i === selectedOpt);
+    });
+  }
+
+  function submitAnswer() {
+    quizState = 'feedback';
+    const q = quizData[currentQ];
+    const opts = document.querySelectorAll('.quiz-option');
+    const fb = document.getElementById('quiz-feedback');
+    fb.style.display = 'block';
+    
+    if (selectedOpt === q.ans) {
+      opts[selectedOpt].classList.add('correct');
+      fb.style.background = '#1a3324';
+      fb.style.color = 'var(--grid)';
+      fb.innerText = "Correct! +100 QA Points.";
+      qScore++;
+      tone(600, 0.1, 'square'); setTimeout(() => tone(800, 0.15, 'square'), 100);
+    } else {
+      opts[selectedOpt].classList.add('wrong');
+      opts[q.ans].classList.add('correct');
+      fb.style.background = '#331a1a';
+      fb.style.color = 'var(--danger)';
+      fb.innerText = "Incorrect! The right answer is highlighted.";
+      tone(200, 0.3, 'sawtooth');
+    }
+  }
+
+  function showQuizResults() {
+    quizState = 'finished';
+    document.getElementById('q-title').innerText = "Exam Completed!";
+    document.getElementById('quiz-container').innerHTML = `
+      <div style="text-align:center; padding: 30px;">
+        <h1 style="font-size:40px;">Score: ${qScore} / ${quizData.length}</h1>
+        <p>${qScore === 5 ? 'Senior QA Architect Status Achieved! ★★★' : 'Keep studying the masterclass!'}</p>
+        <p style="color:var(--mint); margin-top:20px;">Press Ⓐ to try again.</p>
+      </div>
+    `;
+    if(qScore === 5) {
+      tone(400,0.1); setTimeout(()=>tone(500,0.1),100); setTimeout(()=>tone(600,0.2),200);
+    }
+  }
+
+  // ==== GAME SYSTEM ====
+  // Canvas fillStyle does NOT accept CSS var() — use real colors here.
+  const COL = { gold: '#ffe45e', danger: '#ff5b3d', grid: '#1bff6a', mint: '#aaffc4', bg: '#030806' };
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 960, H = 540;
+
+  let gameState = 'menu';   // menu, playing, gameover
+  let activeGame = null;    // 'defender' | 'squash'
+  let selGame = 0;          // selector cursor
+  let particles = [];
+  let frameCount = 0;
+
+  const GAMES = [
+    { id: 'defender', emoji: '🛡️', name: 'DEFECT DEFENDER',
+      desc: 'Shoot the red bugs, but let green features pass. Don\'t let defects reach production!' },
+    { id: 'squash', emoji: '🔨', name: 'BUG SQUASH',
+      desc: 'Move the crosshair across the server racks and smash bugs before they escape. Spare the features!' }
+  ];
+
+  function spawnParticles(x, y, color) {
+    for (let i = 0; i < 15; i++) {
+      particles.push({ x, y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 30, color });
+    }
+  }
+  function updateParticles() {
+    particles.forEach(pt => { pt.x += pt.vx; pt.y += pt.vy; pt.life--; });
+    particles = particles.filter(pt => pt.life > 0);
+  }
+  function drawParticles() {
+    particles.forEach(pt => {
+      ctx.globalAlpha = pt.life / 30;
+      ctx.fillStyle = pt.color;
+      ctx.fillRect(pt.x, pt.y, 4, 4);
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawBackdrop() {
+    ctx.fillStyle = COL.bg; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#0d7d38'; ctx.lineWidth = 1; ctx.globalAlpha = 0.3;
+    for (let y=0; y<H; y+=40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+    for (let x=0; x<W; x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+  }
+
+  // ---- Arcade selector ----
+  window.showGameMenu = function() {
+    gameState = 'menu';
+    activeGame = null;
+    document.getElementById('header-status').innerText = 'ARCADE';
+    const ui = document.getElementById('game-ui');
+    ui.classList.remove('hidden');
+    renderGameMenu();
+    drawBackdrop();
+  };
+
+  function renderGameMenu() {
+    const cards = GAMES.map((g, i) => `
+      <div class="game-card ${i === selGame ? 'sel' : ''}" onclick="pickGame(${i})">
+        <div class="emoji">${g.emoji}</div>
+        <h3>${g.name}</h3>
+        <p>${g.desc}</p>
+      </div>`).join('');
+    document.getElementById('game-ui').innerHTML = `
+      <p class="bmo-tag">BMO PRESENTS</p>
+      <h1 style="font-size:40px; color:var(--gold); text-shadow:2px 2px #7b4b00;">QA ARCADE</h1>
+      <div id="game-select">${cards}</div>
+      <p class="hint">◀ ▶ choose &nbsp;·&nbsp; Ⓐ / START to play</p>
+      <button class="game-btn" onclick="startGame(GAMES[selGame].id)">▶ START</button>
+    `;
+  }
+
+  window.pickGame = function(i) { selGame = i; renderGameMenu(); tone(500, 0.04); startGame(GAMES[i].id); };
+
+  function handleMenuInput() {
+    if (isJustPressed('left'))  { selGame = (selGame - 1 + GAMES.length) % GAMES.length; renderGameMenu(); tone(400,0.03,'sine'); }
+    if (isJustPressed('right')) { selGame = (selGame + 1) % GAMES.length; renderGameMenu(); tone(400,0.03,'sine'); }
+    if (isJustPressed('action')) startGame(GAMES[selGame].id);
+  }
+
+  window.startGame = function(id) {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    activeGame = id;
+    gameState = 'playing';
+    particles = []; frameCount = 0;
+    document.getElementById('game-ui').classList.add('hidden');
+    if (id === 'defender') initDefender();
+    else initSquash();
+    tone(440, 0.1); setTimeout(() => tone(880, 0.2), 100);
+  };
+
+  function gameOver(title, sub, color) {
+    gameState = 'gameover';
+    document.getElementById('game-ui').innerHTML = `
+      <p class="bmo-tag">BMO PRESENTS</p>
+      <h1 style="color:${color}; font-size:44px;">${title}</h1>
+      <h2 style="border:0;">${sub}</h2>
+      <button class="game-btn" onclick="showGameMenu()">RETURN TO ARCADE</button>
+    `;
+    document.getElementById('game-ui').classList.remove('hidden');
+  }
+
+  // ==== GAME 1: DEFECT DEFENDER ====
+  const p = { x: W/2, y: H - 60, w: 50, h: 40, speed: 7, cd: 0 };
+  let bullets = [];
+  let entities = [];
+  let dScore = 0, dLives = 3;
+
+  function initDefender() {
+    dScore = 0; dLives = 3; p.x = W/2; p.cd = 0;
+    bullets = []; entities = [];
+  }
+
+  function spawnEntity() {
+    const isBug = Math.random() > 0.4; // 60% bugs, 40% features
+    entities.push({
+      x: 50 + Math.random() * (W - 100), y: -50, w: 40, h: 40,
+      type: isBug ? 'bug' : 'feature',
+      vy: 1.5 + Math.random() * 2 + (dScore/1000)
+    });
+  }
+
+  function handleDefenderInput() {
+    if (keys.left) p.x -= p.speed;
+    if (keys.right) p.x += p.speed;
+    p.x = Math.max(20, Math.min(W - p.w - 20, p.x));
+    if (p.cd > 0) p.cd--;
+    if (keys.action && p.cd === 0) {
+      bullets.push({ x: p.x + p.w/2 - 4, y: p.y, w: 8, h: 16, vy: -12 });
+      p.cd = 15;
+      tone(700, 0.05, 'triangle');
+    }
+  }
+
+  function updateDefender() {
+    frameCount++;
+    if (frameCount % Math.max(30, 90 - Math.floor(dScore/50)) === 0) spawnEntity();
+
+    bullets.forEach(b => b.y += b.vy);
+    bullets = bullets.filter(b => b.y > -20);
+
+    for (let i = entities.length - 1; i >= 0; i--) {
+      let e = entities[i];
+      e.y += e.vy;
+      let hit = false;
+      for (let j = bullets.length - 1; j >= 0; j--) {
+        let b = bullets[j];
+        if (b.x < e.x + e.w && b.x + b.w > e.x && b.y < e.y + e.h && b.y + b.h > e.y) {
+          hit = true; bullets.splice(j, 1); break;
+        }
+      }
+      if (hit) {
+        if (e.type === 'bug') {
+          dScore += 100; spawnParticles(e.x+20, e.y+20, COL.danger); tone(200, 0.1, 'sawtooth');
+        } else {
+          dScore = Math.max(0, dScore - 50); spawnParticles(e.x+20, e.y+20, COL.grid); tone(150, 0.2, 'square');
+        }
+        entities.splice(i, 1);
+        continue;
+      }
+      if (e.y > H) {
+        if (e.type === 'bug') {
+          dLives--; tone(100, 0.4, 'sawtooth', 0.1);
+          if (dLives <= 0) { gameOver('PRODUCTION DOWN', `Final Score: ${dScore}`, 'var(--danger)'); }
+        } else {
+          dScore += 50; tone(600, 0.1, 'sine');
+        }
+        entities.splice(i, 1);
+      }
+    }
+    updateParticles();
+  }
+
+  function drawDefender() {
+    drawBackdrop();
+    if (gameState === 'playing') {
+      // Player
+      ctx.fillStyle = COL.gold;
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(p.x+10, p.y+10, 8, 8); ctx.fillRect(p.x+32, p.y+10, 8, 8);
+      ctx.fillRect(p.x+15, p.y+25, 20, 5);
+      ctx.fillStyle = COL.gold;
+      ctx.fillRect(p.x+20, p.y-10, 10, 10);
+
+      ctx.fillStyle = '#fff';
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+
+      entities.forEach(e => {
+        ctx.save(); ctx.translate(e.x, e.y);
+        if (e.type === 'bug') {
+          ctx.fillStyle = COL.danger;
+          ctx.fillRect(0, 10, 40, 20); ctx.fillRect(10, 0, 20, 10);
+          ctx.fillStyle = '#000'; ctx.fillRect(12, 2, 5, 5); ctx.fillRect(23, 2, 5, 5);
+          ctx.fillStyle = COL.danger;
+          let legWig = Math.sin(frameCount/5)*5;
+          ctx.fillRect(-5, 12 + legWig, 5, 4); ctx.fillRect(40, 12 - legWig, 5, 4);
+          ctx.fillRect(-5, 24 - legWig, 5, 4); ctx.fillRect(40, 24 + legWig, 5, 4);
+        } else {
+          ctx.fillStyle = COL.grid;
+          ctx.fillRect(0, 0, 40, 40);
+          ctx.fillStyle = '#000'; ctx.font = 'bold 20px monospace';
+          ctx.fillText('</>', 2, 26);
+        }
+        ctx.restore();
+      });
+    }
+    drawParticles();
+
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 24px Consolas, monospace';
+    ctx.textAlign = 'left';  ctx.fillText(`SCORE: ${dScore}`, 20, 40);
+    ctx.textAlign = 'right';
+    let hpStr = ''; for (let i=0; i<3; i++) hpStr += (i < dLives ? '♥' : '♡');
+    ctx.fillStyle = dLives === 1 ? COL.danger : COL.mint;
+    ctx.fillText(`PROD LIVES: ${hpStr}`, W-20, 40);
+  }
+
+  // ==== GAME 2: BUG SQUASH (whack-a-bug on the server racks) ====
+  const SQ = { cols: 4, rows: 3, cells: [], cursor: 0, score: 0, lives: 5, spawnT: 0 };
+
+  function sqCellRect(i) {
+    const c = i % SQ.cols, r = Math.floor(i / SQ.cols);
+    const padX = 70, padTop = 78, gap = 18;
+    const areaW = W - padX*2, areaH = H - padTop - 28;
+    const cw = areaW / SQ.cols, ch = areaH / SQ.rows;
+    return { x: padX + c*cw + gap/2, y: padTop + r*ch + gap/2, w: cw - gap, h: ch - gap };
+  }
+
+  function initSquash() {
+    SQ.cells = new Array(SQ.cols * SQ.rows).fill(null);
+    SQ.cursor = 0; SQ.score = 0; SQ.lives = 5; SQ.spawnT = 0;
+  }
+
+  function handleSquashInput() {
+    const c = SQ.cursor % SQ.cols, r = Math.floor(SQ.cursor / SQ.cols);
+    if (isJustPressed('left'))  { SQ.cursor = r*SQ.cols + (c - 1 + SQ.cols) % SQ.cols; tone(400,0.03,'sine'); }
+    if (isJustPressed('right')) { SQ.cursor = r*SQ.cols + (c + 1) % SQ.cols; tone(400,0.03,'sine'); }
+    if (isJustPressed('up'))    { SQ.cursor = ((r - 1 + SQ.rows) % SQ.rows)*SQ.cols + c; tone(400,0.03,'sine'); }
+    if (isJustPressed('down'))  { SQ.cursor = ((r + 1) % SQ.rows)*SQ.cols + c; tone(400,0.03,'sine'); }
+    if (isJustPressed('action')) {
+      const cell = SQ.cells[SQ.cursor];
+      const rect = sqCellRect(SQ.cursor);
+      const cx = rect.x + rect.w/2, cy = rect.y + rect.h/2;
+      if (cell && cell.type === 'bug') {
+        SQ.score += 100; spawnParticles(cx, cy, COL.danger); tone(220, 0.1, 'sawtooth');
+        SQ.cells[SQ.cursor] = null;
+      } else if (cell && cell.type === 'feature') {
+        SQ.score = Math.max(0, SQ.score - 50); SQ.lives--; spawnParticles(cx, cy, COL.grid); tone(140, 0.25, 'square');
+        SQ.cells[SQ.cursor] = null;
+        if (SQ.lives <= 0) gameOver('BROKE THE BUILD', `You smashed a feature! Score: ${SQ.score}`, 'var(--danger)');
+      } else {
+        tone(300, 0.04, 'triangle'); // whiff
+      }
+    }
+  }
+
+  function updateSquash() {
+    frameCount++;
+    // Age occupants; a bug that times out escapes to production.
+    for (let i = 0; i < SQ.cells.length; i++) {
+      const cell = SQ.cells[i];
+      if (!cell) continue;
+      cell.life--;
+      if (cell.life <= 0) {
+        if (cell.type === 'bug') {
+          SQ.lives--; tone(110, 0.35, 'sawtooth', 0.09);
+          if (SQ.lives <= 0) { SQ.cells[i] = null; gameOver('BUGS SHIPPED', `Too many escaped! Score: ${SQ.score}`, 'var(--danger)'); }
+        }
+        SQ.cells[i] = null;
+      }
+    }
+    // Spawn into a random empty cell, faster as score climbs.
+    SQ.spawnT--;
+    if (SQ.spawnT <= 0) {
+      const empty = SQ.cells.map((v,i)=>v?null:i).filter(v=>v!==null);
+      if (empty.length) {
+        const idx = empty[Math.floor(Math.random()*empty.length)];
+        const isBug = Math.random() > 0.28; // ~72% bugs
+        const ttl = Math.max(38, 95 - Math.floor(SQ.score/120));
+        SQ.cells[idx] = { type: isBug ? 'bug' : 'feature', life: ttl, maxLife: ttl };
+      }
+      SQ.spawnT = Math.max(22, 55 - Math.floor(SQ.score/150));
+    }
+    updateParticles();
+  }
+
+  function drawSquash() {
+    drawBackdrop();
+    for (let i = 0; i < SQ.cells.length; i++) {
+      const r = sqCellRect(i);
+      // rack hole
+      ctx.fillStyle = '#0a1f14';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.strokeStyle = '#173e34'; ctx.lineWidth = 3;
+      ctx.strokeRect(r.x, r.y, r.w, r.h);
+      // rack detail lines
+      ctx.strokeStyle = '#0d3324'; ctx.lineWidth = 1;
+      for (let ly = r.y + 14; ly < r.y + r.h - 8; ly += 14) {
+        ctx.beginPath(); ctx.moveTo(r.x+6, ly); ctx.lineTo(r.x+r.w-6, ly); ctx.stroke();
+      }
+      const cell = SQ.cells[i];
+      if (cell) {
+        const cx = r.x + r.w/2, cy = r.y + r.h/2;
+        const pop = 1 - (cell.life / cell.maxLife) * 0.15; // subtle
+        if (cell.type === 'bug') {
+          ctx.fillStyle = COL.danger;
+          ctx.fillRect(cx-20, cy-8, 40, 22);
+          ctx.fillRect(cx-10, cy-18, 20, 12);
+          ctx.fillStyle = '#000'; ctx.fillRect(cx-7, cy-15, 5, 5); ctx.fillRect(cx+2, cy-15, 5, 5);
+          ctx.fillStyle = COL.danger;
+          const wig = Math.sin(frameCount/4 + i)*4;
+          ctx.fillRect(cx-26, cy-4+wig, 6, 4); ctx.fillRect(cx+20, cy-4-wig, 6, 4);
+          ctx.fillRect(cx-26, cy+8-wig, 6, 4); ctx.fillRect(cx+20, cy+8+wig, 6, 4);
+        } else {
+          ctx.fillStyle = COL.grid;
+          ctx.fillRect(cx-20, cy-18, 40, 36);
+          ctx.fillStyle = '#000'; ctx.font = 'bold 18px monospace'; ctx.textAlign = 'center';
+          ctx.fillText('</>', cx, cy+6);
+        }
+        // life bar
+        ctx.fillStyle = cell.type === 'bug' ? '#ffffff55' : '#00000055';
+        ctx.fillRect(r.x+6, r.y+r.h-8, (r.w-12) * (cell.life/cell.maxLife), 4);
+      }
+    }
+    // Cursor crosshair
+    const cr = sqCellRect(SQ.cursor);
+    ctx.strokeStyle = COL.gold; ctx.lineWidth = 4;
+    ctx.strokeRect(cr.x-3, cr.y-3, cr.w+6, cr.h+6);
+    const gx = cr.x + cr.w/2, gy = cr.y + cr.h/2;
+    ctx.beginPath(); ctx.moveTo(gx-14, gy); ctx.lineTo(gx+14, gy);
+    ctx.moveTo(gx, gy-14); ctx.lineTo(gx, gy+14); ctx.stroke();
+
+    drawParticles();
+
+    ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.font = 'bold 24px Consolas, monospace';
+    ctx.fillText(`SCORE: ${SQ.score}`, 20, 40);
+    ctx.textAlign = 'right';
+    let hp = ''; for (let i=0; i<5; i++) hp += (i < SQ.lives ? '♥' : '♡');
+    ctx.fillStyle = SQ.lives <= 1 ? COL.danger : COL.mint;
+    ctx.fillText(`PROD LIVES: ${hp}`, W-20, 40);
+  }
+
+  // ==== MAIN LOOP ====
+  function loop() {
+    if (activeTab === 'quiz') {
+      handleQuizInput();
+    } else if (activeTab === 'game') {
+      if (gameState === 'menu') {
+        handleMenuInput();
+      } else if (activeGame === 'defender') {
+        if (gameState === 'playing') { handleDefenderInput(); updateDefender(); }
+        drawDefender();
+      } else if (activeGame === 'squash') {
+        if (gameState === 'playing') { handleSquashInput(); updateSquash(); }
+        drawSquash();
+      }
+      if (gameState === 'gameover' && isJustPressed('action')) showGameMenu();
+    } else {
+      // Tab switching via D-Pad on the reading tabs
+      if (isJustPressed('left')) {
+        let curr = tabsList.indexOf(activeTab);
+        if (curr > 0) switchTab(tabsList[curr - 1]);
+      }
+      if (isJustPressed('right')) {
+        let curr = tabsList.indexOf(activeTab);
+        if (curr < tabsList.length - 1) switchTab(tabsList[curr + 1]);
+      }
+    }
+
+    Object.keys(keys).forEach(k => lastKeys[k] = keys[k]);
+    requestAnimationFrame(loop);
+  }
+
+  // Start Loop
+  requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
